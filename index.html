@@ -48,6 +48,14 @@
       font-size: 12px;
       cursor: move;
     }
+    .card.US {
+      background-color: #cce5ff;
+      border-color: #007bff;
+    }
+    .card.PRC {
+      background-color: #f8d7da;
+      border-color: #dc3545;
+    }
     .top-right-info {
       position: absolute;
       top: 1rem;
@@ -79,6 +87,12 @@
     .card-option:hover {
       background: #eef;
     }
+    #resetAllBtn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 30;
+    }
   </style>
 </head>
 <body>
@@ -86,6 +100,7 @@
   <h2>Select a Server</h2>
   <input type="text" id="serverIdInput" placeholder="Enter server name" />
   <button onclick="joinServer()">Join Server</button>
+  <button id="resetAllBtn" onclick="resetAllServers()">Master Reset</button>
 </div>
 
 <div id="waiting-screen">
@@ -153,6 +168,13 @@
     });
   }
 
+  function resetAllServers() {
+    if (confirm("Are you sure you want to reset all servers?")) {
+      firebase.database().ref("servers").remove();
+      alert("All servers have been reset.");
+    }
+  }
+
   document.getElementById("usBtn").onclick = () => selectTeam("US");
   document.getElementById("prcBtn").onclick = () => selectTeam("PRC");
 
@@ -195,7 +217,7 @@
 
   function placeCard(data, id) {
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = `card ${data.team}`;
     card.textContent = `${data.team} ${data.label}`;
     card.style.left = data.x + "px";
     card.style.top = data.y + "px";
