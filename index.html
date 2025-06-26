@@ -1,2 +1,177 @@
 <!DOCTYPE html>
-<h1>hello there</h1>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Board Game – Starter Scaffold</title>
+  <style>
+    /* --- Layout --- */
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    /* Board grid */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      grid-template-rows: repeat(5, 80px);
+      gap: 4px;
+    }
+    .cell {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #555;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Cards */
+    .card {
+      width: 60px;
+      height: 80px;
+      border: 1px solid #333;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      user-select: none;
+    }
+    .card.type-attack {
+      background: #ffdede;
+    }
+    .card.type-defense {
+      background: #def4ff;
+    }
+    .card.type-magic {
+      background: #e9deff;
+    }
+
+    /* Tokens */
+    .token {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #333;
+      cursor: grab;
+      user-select: none;
+    }
+
+    /* Side‑panel containers */
+    #panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    #deck,
+    #tokens {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main board -->
+  <div id="board"></div>
+
+  <!-- Side panel for deck & tokens -->
+  <div id="panel">
+    <section>
+      <h3>Deck</h3>
+      <div id="deck"></div>
+    </section>
+
+    <section>
+      <h3>Tokens</h3>
+      <div id="tokens"></div>
+    </section>
+  </div>
+
+  <script>
+    /**************** Board Construction ****************/
+    const BOARD_SIZE = 5; // change to make bigger or smaller boards
+    const board = document.getElementById("board");
+
+    // Build the grid cells and register them as drop targets
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      for (let c = 0; c < BOARD_SIZE; c++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        registerDropTarget(cell);
+        board.appendChild(cell);
+      }
+    }
+
+    /**************** Deck: sample cards ****************/
+    const deck = document.getElementById("deck");
+    const sampleCards = [
+      { id: "card1", label: "Attack", type: "attack" },
+      { id: "card2", label: "Defense", type: "defense" },
+      { id: "card3", label: "Magic", type: "magic" }
+    ];
+
+    sampleCards.forEach((c) => {
+      const card = document.createElement("div");
+      card.className = `card type-${c.type}`;
+      card.id = c.id;
+      card.textContent = c.label;
+      card.draggable = true;
+      registerDraggable(card);
+      deck.appendChild(card);
+    });
+
+    /**************** Tokens: sample player pieces ****************/
+    const tokensArea = document.getElementById("tokens");
+    const sampleTokens = [
+      { id: "tokenRed", color: "red" },
+      { id: "tokenBlue", color: "royalblue" }
+    ];
+
+    sampleTokens.forEach((t) => {
+      const token = document.createElement("div");
+      token.className = "token";
+      token.id = t.id;
+      token.style.background = t.color;
+      token.draggable = true;
+      registerDraggable(token);
+      tokensArea.appendChild(token);
+    });
+
+    /**************** Drag‑and‑Drop helpers ****************/
+    let draggedElement = null;
+
+    function registerDraggable(el) {
+      el.addEventListener("dragstart", (e) => {
+        draggedElement = e.target;
+        e.dataTransfer.setData("text/plain", e.target.id);
+        setTimeout(() => (e.target.style.opacity = "0.3"), 0); // visual cue
+      });
+
+      el.addEventListener("dragend", (e) => {
+        e.target.style.opacity = "";
+        draggedElement = null;
+      });
+    }
+
+    function registerDropTarget(el) {
+      el.addEventListener("dragover", (e) => e.preventDefault());
+      el.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const id = e.dataTransfer.getData("text/plain");
+        const piece = document.getElementById(id);
+        if (piece) el.appendChild(piece);
+      });
+    }
+
+    // Make the side‑panel areas drop targets as well so pieces can return
+    [deck, tokensArea].forEach(registerDropTarget);
+  </script>
+</body>
+</html>
