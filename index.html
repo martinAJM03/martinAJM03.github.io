@@ -12,7 +12,7 @@
       height: 100vh;
       overflow: hidden;
     }
-    #waiting-screen, #team-selection, #container {
+    #server-selection, #waiting-screen, #team-selection, #container {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -23,8 +23,8 @@
       background: #f0f0f0;
       z-index: 10;
     }
-    #team-selection { display: none; }
-    #container { display: none; z-index: 1; background: #eaeaea; }
+    #waiting-screen, #team-selection, #container { display: none; }
+    #container { z-index: 1; background: #eaeaea; }
     button {
       padding: 1rem 2rem;
       margin: 1rem;
@@ -82,6 +82,12 @@
   </style>
 </head>
 <body>
+<div id="server-selection">
+  <h2>Select a Server</h2>
+  <input type="text" id="serverIdInput" placeholder="Enter server name" />
+  <button onclick="joinServer()">Join Server</button>
+</div>
+
 <div id="waiting-screen">
   <h1>Waiting for players...</h1>
   <p>Connected Players: <span id="playerCount">0</span></p>
@@ -119,35 +125,39 @@
     appId: "1:342205190998:web:fac309391e90aa61eabcf7"
   };
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
 
-  const userRef = db.ref("connectedUsers");
-  const playersRef = db.ref("players");
-  const cardsRef = db.ref("cards");
-
-  const userId = userRef.push(true).key;
-  userRef.child(userId).onDisconnect().remove();
-
+  let serverId = null;
   let myTeam = null;
+  let userId = null;
+  let serverRef = null;
 
-  userRef.on("value", snap => {
-    const count = snap.numChildren();
-    document.getElementById("playerCount").textContent = count;
-    if (count >= 2) {
-      document.getElementById("waiting-screen").style.display = "none";
-      document.getElementById("team-selection").style.display = "flex";
-    }
-  });
+  function joinServer() {
+    serverId = document.getElementById("serverIdInput").value.trim();
+    if (!serverId) return alert("Please enter a server name.");
 
-  function updateInfo() {
-    document.getElementById("selected-info").innerHTML = `Team: ${myTeam || 'None'}<br>Mission: None<br>Posture: None`;
+    document.getElementById("server-selection").style.display = "none";
+    document.getElementById("waiting-screen").style.display = "flex";
+
+    serverRef = firebase.database().ref(`servers/${serverId}`);
+    const userRef = serverRef.child("connectedUsers");
+    userId = userRef.push(true).key;
+    userRef.child(userId).onDisconnect().remove();
+
+    userRef.on("value", snap => {
+      const count = snap.numChildren();
+      document.getElementById("playerCount").textContent = count;
+      if (count >= 2) {
+        document.getElementById("waiting-screen").style.display = "none";
+        document.getElementById("team-selection").style.display = "flex";
+      }
+    });
   }
 
   document.getElementById("usBtn").onclick = () => selectTeam("US");
   document.getElementById("prcBtn").onclick = () => selectTeam("PRC");
 
   function selectTeam(team) {
-    playersRef.child(userId).set({ team });
+    serverRef.child("players").child(userId).set({ team });
     myTeam = team;
     updateInfo();
     document.getElementById("team-selection").style.display = "none";
@@ -155,12 +165,16 @@
     initCardSync();
   }
 
+  function updateInfo() {
+    document.getElementById("selected-info").innerHTML = `Team: ${myTeam || 'None'}<br>Mission: None<br>Posture: None`;
+  }
+
   function initCardSync() {
+    const cardsRef = serverRef.child("cards");
     cardsRef.on("child_added", snap => {
       const data = snap.val();
       placeCard(data, snap.key);
     });
-
     cardsRef.on("child_changed", snap => {
       const data = snap.val();
       const card = document.querySelector(`[data-id='${snap.key}']`);
@@ -168,6 +182,14 @@
         card.style.left = data.x + "px";
         card.style.top = data.y + "px";
       }
+    });
+
+    document.getElementById("board").addEventListener("dragover", e => e.preventDefault());
+    document.getElementById("board").addEventListener("drop", e => {
+      const id = e.dataTransfer.getData("text");
+      const x = e.clientX;
+      const y = e.clientY;
+      cardsRef.child(id).update({ x, y });
     });
   }
 
@@ -179,27 +201,17 @@
     card.style.top = data.y + "px";
     card.setAttribute("data-id", id);
     card.draggable = true;
-
     card.addEventListener("dragstart", e => {
       e.dataTransfer.setData("text", id);
     });
-
     document.getElementById("board").appendChild(card);
   }
 
-  document.getElementById("board").addEventListener("dragover", e => e.preventDefault());
-  document.getElementById("board").addEventListener("drop", e => {
-    const id = e.dataTransfer.getData("text");
-    const x = e.clientX;
-    const y = e.clientY;
-    cardsRef.child(id).update({ x, y });
-  });
-
   function submitCard(label) {
-    if (!myTeam) return;
+    if (!myTeam || !serverRef) return;
     const x = Math.random() * window.innerWidth * 0.8;
     const y = Math.random() * window.innerHeight * 0.8;
-    cardsRef.push({ label, x, y, team: myTeam });
+    serverRef.child("cards").push({ label, x, y, team: myTeam });
   }
 </script>
 </body>
