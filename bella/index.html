@@ -2,18 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>i love bella</title>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
     body {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
       font-family: Arial, sans-serif;
       background-color: #fff0f5;
+      position: relative;
     }
 
     h1 {
@@ -21,6 +29,7 @@
       font-size: 24px;
       color: #ff1493;
       min-height: 1.2em;
+      transition: opacity 1s ease;
     }
 
     button {
@@ -43,36 +52,50 @@
     button:active {
       transform: scale(0.95);
     }
+
+    #bella-image {
+      display: none;
+      opacity: 0;
+      transition: opacity 2s ease;
+      max-width: 80%;
+      position: absolute;
+      bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h1 id="main-text"></h1>
   <button id="love-button" disabled></button>
+  <img id="bella-image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA..." alt="Bella">
 
   <script>
     const mainText = document.getElementById('main-text');
     const button = document.getElementById('love-button');
+    const image = document.getElementById('bella-image');
 
     const dialogue = [
       { main: "Hi Bella!", button: "Hey cutie;)" },
-      { main: "Do you like me?", button: "Yes, a billion times yes!" },
-      { main: "Do you think I'm cute?", button: "Way cuter than my other boyfriends." },
+      { main: "Do you love me?", button: "Yes, a billion times yes!" },
+      { main: "Do you think I'm cute?", button: "Way cuter than my other boyfriends" },
       { main: "Would you like to go on a date with me?", button: "Of course! What are you thinking?" },
       { main: "Dinner of your choosing, Sunday, 6:00PM, wear something fancy;)", button: "I'm in!" },
       { main: "Great! I love you so much!", button: "I love you more!" }
     ];
 
     let index = 0;
+    let typing = false;
 
     function typeText(text, callback) {
       let i = 0;
       mainText.textContent = "";
       button.disabled = true;
-      const typing = setInterval(() => {
+      typing = true;
+      const interval = setInterval(() => {
         mainText.textContent += text.charAt(i);
         i++;
         if (i >= text.length) {
-          clearInterval(typing);
+          clearInterval(interval);
+          typing = false;
           if (callback) callback();
         }
       }, 50);
@@ -85,16 +108,26 @@
           button.style.opacity = 1;
           button.disabled = false;
         });
+      } else {
+        mainText.style.opacity = 0;
+        button.style.opacity = 0;
+        button.disabled = true;
+        setTimeout(() => {
+          image.style.display = 'block';
+          setTimeout(() => {
+            image.style.opacity = 1;
+          }, 50);
+        }, 1000);
       }
     }
 
     button.addEventListener('click', () => {
+      if (typing) return;
       button.style.opacity = 0;
       index++;
       setTimeout(showNext, 300);
     });
 
-    // Initial run
     showNext();
   </script>
 </body>
