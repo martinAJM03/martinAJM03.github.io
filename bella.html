@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i love bella</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff0f5;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #ff1493;
+      min-height: 1.2em;
+    }
+
+    button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    button:hover {
+      background-color: #ff85c1;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <h1 id="main-text"></h1>
+  <button id="love-button" disabled></button>
+
+  <script>
+    const mainText = document.getElementById('main-text');
+    const button = document.getElementById('love-button');
+
+    const dialogue = [
+      { main: "Hi Bella!", button: "Hey cutie;)" },
+      { main: "Do you love me?", button: "Yes, a billion times yes!" },
+      { main: "Do you think I'm cute?", button: "Way cuter than my other boyfriends" },
+      { main: "Would you like to go on a date with me?", button: "Of course! What are you thinking?" },
+      { main: "Dinner of your choosing, Sunday, 6:00PM, wear something fancy;)", button: "I'm in!" },
+      { main: "Great! I love you so much!", button: "I love you more!" }
+    ];
+
+    let index = 0;
+
+    function typeText(text, callback) {
+      let i = 0;
+      mainText.textContent = "";
+      button.disabled = true;
+      const typing = setInterval(() => {
+        mainText.textContent += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+          clearInterval(typing);
+          if (callback) callback();
+        }
+      }, 50);
+    }
+
+    function showNext() {
+      if (index < dialogue.length) {
+        typeText(dialogue[index].main, () => {
+          button.textContent = dialogue[index].button;
+          button.style.opacity = 1;
+          button.disabled = false;
+        });
+      }
+    }
+
+    button.addEventListener('click', () => {
+      button.style.opacity = 0;
+      index++;
+      setTimeout(showNext, 300);
+    });
+
+    // Initial run
+    showNext();
+  </script>
+</body>
+</html>
