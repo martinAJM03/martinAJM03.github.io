@@ -57,6 +57,28 @@
       border: 1px solid #ccc;
       z-index: 20;
     }
+    .card-select-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      z-index: 5;
+    }
+    .card-option {
+      padding: 0.5rem;
+      border: 1px solid #888;
+      background: #fff;
+      cursor: pointer;
+    }
+    .card-option:hover {
+      background: #eef;
+    }
   </style>
 </head>
 <body>
@@ -76,6 +98,14 @@
 <div id="container">
   <div class="top-right-info" id="selected-info">Team: None<br>Mission: None<br>Posture: None</div>
   <div id="board"></div>
+  <div class="card-select-panel">
+    <div><strong>Select Card:</strong></div>
+    <div class="card-option" onclick="submitCard('Mission 1')">Mission 1</div>
+    <div class="card-option" onclick="submitCard('Posture 1')">Posture 1</div>
+    <div class="card-option" onclick="submitCard('Enabler 1')">Enabler 1</div>
+    <div class="card-option" onclick="submitCard('Squadron 1')">Squadron 1</div>
+    <div class="card-option" onclick="submitCard('Squadron 2')">Squadron 2</div>
+  </div>
 </div>
 
 <script>
@@ -165,8 +195,8 @@
     cardsRef.child(id).update({ x, y });
   });
 
-  // Example: place a card
   function submitCard(label) {
+    if (!myTeam) return;
     const x = Math.random() * window.innerWidth * 0.8;
     const y = Math.random() * window.innerHeight * 0.8;
     cardsRef.push({ label, x, y, team: myTeam });
