@@ -1,41 +1,176 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Player Connection Test</title>
+  <title>AFWI Online Multiplayer</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #waiting-screen, #team-selection, #container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: #f0f0f0;
+      z-index: 10;
+    }
+    #team-selection { display: none; }
+    #container { display: none; z-index: 1; background: #eaeaea; }
+    button {
+      padding: 1rem 2rem;
+      margin: 1rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    #board {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    .card {
+      position: absolute;
+      width: 80px;
+      height: 100px;
+      background: white;
+      border: 1px solid black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: move;
+    }
+    .top-right-info {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: white;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      z-index: 20;
+    }
+  </style>
 </head>
 <body>
-  <h1>Connected Players: <span id="playerCount">0</span></h1>
+<div id="waiting-screen">
+  <h1>Waiting for players...</h1>
+  <p>Connected Players: <span id="playerCount">0</span></p>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB2gG_CJk2nWXWSo1eS-C6tyEArzgZAU7Q",
-      authDomain: "afwi-online.firebaseapp.com",
-      databaseURL: "https://afwi-online-default-rtdb.firebaseio.com",
-      projectId: "afwi-online",
-      storageBucket: "afwi-online.firebasestorage.app",
-      messagingSenderId: "342205190998",
-      appId: "1:342205190998:web:fac309391e90aa61eabcf7",
-      measurementId: "G-7LF1W3ETRN"
-    };
+<div id="team-selection">
+  <h2>Select Your Team</h2>
+  <div>
+    <button id="usBtn">United States</button>
+    <button id="prcBtn">People's Republic of China</button>
+  </div>
+</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+<div id="container">
+  <div class="top-right-info" id="selected-info">Team: None<br>Mission: None<br>Posture: None</div>
+  <div id="board"></div>
+</div>
 
-    const userRef = db.ref("connectedUsers");
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB2gG_CJk2nWXWSo1eS-C6tyEArzgZAU7Q",
+    authDomain: "afwi-online.firebaseapp.com",
+    databaseURL: "https://afwi-online-default-rtdb.firebaseio.com",
+    projectId: "afwi-online",
+    storageBucket: "afwi-online.appspot.com",
+    messagingSenderId: "342205190998",
+    appId: "1:342205190998:web:fac309391e90aa61eabcf7"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    // Add this user to the list of connected users
-    const newUserRef = userRef.push(true);
+  const userRef = db.ref("connectedUsers");
+  const playersRef = db.ref("players");
+  const cardsRef = db.ref("cards");
 
-    // Remove on disconnect
-    newUserRef.onDisconnect().remove();
+  const userId = userRef.push(true).key;
+  userRef.child(userId).onDisconnect().remove();
 
-    // Count connected users
-    userRef.on("value", snapshot => {
-      const count = snapshot.numChildren();
-      document.getElementById("playerCount").textContent = count;
+  let myTeam = null;
+
+  userRef.on("value", snap => {
+    const count = snap.numChildren();
+    document.getElementById("playerCount").textContent = count;
+    if (count >= 2) {
+      document.getElementById("waiting-screen").style.display = "none";
+      document.getElementById("team-selection").style.display = "flex";
+    }
+  });
+
+  function updateInfo() {
+    document.getElementById("selected-info").innerHTML = `Team: ${myTeam || 'None'}<br>Mission: None<br>Posture: None`;
+  }
+
+  document.getElementById("usBtn").onclick = () => selectTeam("US");
+  document.getElementById("prcBtn").onclick = () => selectTeam("PRC");
+
+  function selectTeam(team) {
+    playersRef.child(userId).set({ team });
+    myTeam = team;
+    updateInfo();
+    document.getElementById("team-selection").style.display = "none";
+    document.getElementById("container").style.display = "block";
+    initCardSync();
+  }
+
+  function initCardSync() {
+    cardsRef.on("child_added", snap => {
+      const data = snap.val();
+      placeCard(data, snap.key);
     });
-  </script>
+
+    cardsRef.on("child_changed", snap => {
+      const data = snap.val();
+      const card = document.querySelector(`[data-id='${snap.key}']`);
+      if (card) {
+        card.style.left = data.x + "px";
+        card.style.top = data.y + "px";
+      }
+    });
+  }
+
+  function placeCard(data, id) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.textContent = `${data.team} ${data.label}`;
+    card.style.left = data.x + "px";
+    card.style.top = data.y + "px";
+    card.setAttribute("data-id", id);
+    card.draggable = true;
+
+    card.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text", id);
+    });
+
+    document.getElementById("board").appendChild(card);
+  }
+
+  document.getElementById("board").addEventListener("dragover", e => e.preventDefault());
+  document.getElementById("board").addEventListener("drop", e => {
+    const id = e.dataTransfer.getData("text");
+    const x = e.clientX;
+    const y = e.clientY;
+    cardsRef.child(id).update({ x, y });
+  });
+
+  // Example: place a card
+  function submitCard(label) {
+    const x = Math.random() * window.innerWidth * 0.8;
+    const y = Math.random() * window.innerHeight * 0.8;
+    cardsRef.push({ label, x, y, team: myTeam });
+  }
+</script>
 </body>
 </html>
