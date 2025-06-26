@@ -46,7 +46,7 @@
       align-items: center;
       justify-content: center;
       font-size: 12px;
-      cursor: move;
+      pointer-events: none;
     }
     .card.US {
       background-color: #cce5ff;
@@ -119,14 +119,6 @@
 <div id="container">
   <div class="top-right-info" id="selected-info">Team: None<br>Mission: None<br>Posture: None</div>
   <div id="board"></div>
-  <div class="card-select-panel">
-    <div><strong>Select Card:</strong></div>
-    <div class="card-option" onclick="submitCard('Mission 1')">Mission 1</div>
-    <div class="card-option" onclick="submitCard('Posture 1')">Posture 1</div>
-    <div class="card-option" onclick="submitCard('Enabler 1')">Enabler 1</div>
-    <div class="card-option" onclick="submitCard('Squadron 1')">Squadron 1</div>
-    <div class="card-option" onclick="submitCard('Squadron 2')">Squadron 2</div>
-  </div>
 </div>
 
 <script>
@@ -185,33 +177,20 @@
     document.getElementById("team-selection").style.display = "none";
     document.getElementById("container").style.display = "block";
     initCardSync();
+    chooseMissionAndPosture();
   }
 
-  function updateInfo() {
-    document.getElementById("selected-info").innerHTML = `Team: ${myTeam || 'None'}<br>Mission: None<br>Posture: None`;
+  function updateInfo(mission = 'None', posture = 'None') {
+    document.getElementById("selected-info").innerHTML = `Team: ${myTeam || 'None'}<br>Mission: ${mission}<br>Posture: ${posture}`;
   }
 
   function initCardSync() {
     const cardsRef = serverRef.child("cards");
     cardsRef.on("child_added", snap => {
       const data = snap.val();
-      placeCard(data, snap.key);
-    });
-    cardsRef.on("child_changed", snap => {
-      const data = snap.val();
-      const card = document.querySelector(`[data-id='${snap.key}']`);
-      if (card) {
-        card.style.left = data.x + "px";
-        card.style.top = data.y + "px";
+      if (data.visibleTo === myTeam || data.visibleTo === 'ALL') {
+        placeCard(data, snap.key);
       }
-    });
-
-    document.getElementById("board").addEventListener("dragover", e => e.preventDefault());
-    document.getElementById("board").addEventListener("drop", e => {
-      const id = e.dataTransfer.getData("text");
-      const x = e.clientX;
-      const y = e.clientY;
-      cardsRef.child(id).update({ x, y });
     });
   }
 
@@ -222,18 +201,46 @@
     card.style.left = data.x + "px";
     card.style.top = data.y + "px";
     card.setAttribute("data-id", id);
-    card.draggable = true;
-    card.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text", id);
-    });
     document.getElementById("board").appendChild(card);
   }
 
-  function submitCard(label) {
-    if (!myTeam || !serverRef) return;
-    const x = Math.random() * window.innerWidth * 0.8;
-    const y = Math.random() * window.innerHeight * 0.8;
-    serverRef.child("cards").push({ label, x, y, team: myTeam });
+  function chooseMissionAndPosture() {
+    const mission = prompt("Select Mission (1-5):");
+    const posture = prompt("Select Posture (1-5):");
+    updateInfo(`Mission ${mission}`, `Posture ${posture}`);
+    serverRef.child("cards").push({
+      label: `Mission ${mission}`,
+      x: 20,
+      y: myTeam === 'US' ? 20 : 140,
+      team: myTeam,
+      visibleTo: 'ALL'
+    });
+    serverRef.child("cards").push({
+      label: `Posture ${posture}`,
+      x: 120,
+      y: myTeam === 'US' ? 20 : 140,
+      team: myTeam,
+      visibleTo: 'ALL'
+    });
+
+    for (let i = 1; i <= 4; i++) {
+      serverRef.child("cards").push({
+        label: `Squadron ${i}`,
+        x: 50 + i * 100,
+        y: myTeam === 'US' ? 300 : 400,
+        team: myTeam,
+        visibleTo: myTeam
+      });
+    }
+    for (let i = 1; i <= 6; i++) {
+      serverRef.child("cards").push({
+        label: `Enabler ${i}`,
+        x: 50 + i * 90,
+        y: myTeam === 'US' ? 450 : 550,
+        team: myTeam,
+        visibleTo: myTeam
+      });
+    }
   }
 </script>
 </body>
