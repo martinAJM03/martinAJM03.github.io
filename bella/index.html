@@ -135,6 +135,14 @@
       setTimeout(showNext, 300);
     });
 
+    document.addEventListener('touchend', function (event) {
+      const now = new Date().getTime();
+      if (window.lastTouchEnd && (now - window.lastTouchEnd) <= 300) {
+        event.preventDefault();
+      }
+      window.lastTouchEnd = now;
+    }, { passive: false });
+
     showNext();
   </script>
 </body>
