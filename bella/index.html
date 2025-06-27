@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>i love bella</title>
   <style>
+    * {
+      touch-action: manipulation;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -15,7 +19,6 @@
       background-color: #fff0f5;
       overflow: hidden;
       overscroll-behavior: none;
-      touch-action: none;
     }
 
     body {
@@ -46,18 +49,12 @@
       font-size: 16px;
       border-radius: 8px;
       cursor: pointer;
-      transition: transform 0.1s ease, opacity 0.3s ease;
+      transition: opacity 0.3s ease;
       opacity: 0;
-      touch-action: manipulation;
     }
 
     button:hover {
       background-color: #ff85c1;
-      transform: scale(1.05);
-    }
-
-    button:active {
-      transform: scale(0.95);
     }
 
     #bella-image {
@@ -135,13 +132,20 @@
       setTimeout(showNext, 300);
     });
 
-    document.addEventListener('touchend', function (event) {
+    // Prevent double-tap zoom
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
       const now = new Date().getTime();
-      if (window.lastTouchEnd && (now - window.lastTouchEnd) <= 300) {
-        event.preventDefault();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
       }
-      window.lastTouchEnd = now;
+      lastTouchEnd = now;
     }, { passive: false });
+
+    // Prevent pinch zoom
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
 
     showNext();
   </script>
