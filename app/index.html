@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon.png"> <!-- Your app icon -->
+  <title>Tab App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+      background-color: #f8f8f8;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .view {
+      flex: 1;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5em;
+      padding: 1em;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    .tab-bar {
+      display: flex;
+      height: 60px;
+      border-top: 1px solid #ccc;
+      background-color: white;
+    }
+
+    .tab {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .tab.active {
+      background-color: #e0e0e0;
+    }
+
+    .tab:active {
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="view1" class="view active">Home View</div>
+    <div id="view2" class="view">Search View</div>
+    <div id="view3" class="view">Settings View</div>
+
+    <div class="tab-bar">
+      <div class="tab active" data-target="view1">Home</div>
+      <div class="tab" data-target="view2">Search</div>
+      <div class="tab" data-target="view3">Settings</div>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const views = document.querySelectorAll('.view');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        views.forEach(v => v.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
