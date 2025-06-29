@@ -174,15 +174,15 @@
     }
     .delete-btn {
       position: absolute;
-      top: -8px;
-      right: -8px;
+      top: -6px;
+      right: -6px;
       background: red;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 0.9em;
+      width: 16px;
+      height: 16px;
+      font-size: 0.7em;
       display: none;
       justify-content: center;
       align-items: center;
@@ -220,7 +220,7 @@
       <div class="view-title">Settings</div>
       <button class="reset-button" onclick="resetData()">Reset All Data</button>
       <button class="update-button" onclick="window.location.reload()">Update</button>
-      <div class="version">Version 0.11</div>
+      <div class="version">Version 0.12</div>
     </div>
     <div class="tab-bar-wrapper">
       <div class="tab-bar">
@@ -327,7 +327,16 @@
         const btn = document.createElement('button');
         btn.className = 'launcher-button';
         btn.textContent = item.name;
-        btn.onclick = () => window.open(item.url, '_blank');
+        btn.onclick = () => {
+          if (isEditing) {
+            document.getElementById('launcher-name').value = item.name;
+            document.getElementById('launcher-url').value = item.url;
+            toggleLauncherForm();
+            btn.setAttribute('data-editing', index);
+          } else {
+            window.open(item.url, '_blank');
+          }
+        };
         if (isEditing) {
           btn.classList.add('edit-mode');
           const x = document.createElement('button');
