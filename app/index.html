@@ -254,10 +254,17 @@
     const optionButtons = document.querySelectorAll('.option-button');
     let launcherItems = JSON.parse(localStorage.getItem('launcherItems') || '[]');
     let isEditing = false;
+    let editingIndex = -1;
     const overlay = document.getElementById('launcher-overlay');
 
     function toggleLauncherForm() {
       overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
+      if (overlay.style.display === 'none') {
+        document.getElementById('launcher-name').value = '';
+        document.getElementById('launcher-url').value = '';
+        document.getElementById('launcher-error').textContent = '';
+        editingIndex = -1;
+      }
     }
 
     function submitLauncher() {
@@ -269,11 +276,16 @@
         return;
       }
       errorDiv.textContent = '';
-      launcherItems.push({ name, url });
+      if (editingIndex > -1) {
+        launcherItems[editingIndex] = { name, url };
+      } else {
+        launcherItems.push({ name, url });
+      }
       localStorage.setItem('launcherItems', JSON.stringify(launcherItems));
       renderLauncher();
       document.getElementById('launcher-name').value = '';
       document.getElementById('launcher-url').value = '';
+      editingIndex = -1;
       overlay.style.display = 'none';
     }
 
@@ -331,8 +343,8 @@
           if (isEditing) {
             document.getElementById('launcher-name').value = item.name;
             document.getElementById('launcher-url').value = item.url;
+            editingIndex = index;
             toggleLauncherForm();
-            btn.setAttribute('data-editing', index);
           } else {
             window.open(item.url, '_blank');
           }
