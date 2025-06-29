@@ -24,6 +24,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    body::before {
+      content: "";
+      display: block;
+      height: env(safe-area-inset-top);
+      background-color: white;
+    }
+
     .app {
       display: flex;
       flex-direction: column;
@@ -53,7 +60,7 @@
 
     .view-title {
       position: fixed;
-      top: 1em;
+      top: calc(env(safe-area-inset-top) + 1em);
       left: 0.7em;
       font-weight: bolder;
       font-size: 1.3em;
