@@ -1,4 +1,3 @@
-<!-- receiver.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,16 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
   <title>Message Viewer</title>
   <style>
     body { font-family: sans-serif; margin: 0; padding: 0; }
     .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #eee; border-top: 1px solid #ccc; }
     .tab-bar button { flex: 1; padding: 15px; font-weight: bold; background: none; border: none; }
-    .view { padding: 60px 20px 80px; display: none; }
+    .view { padding: 60px 20px 100px; display: none; }
     .view.active { display: block; }
+    .subscribe-container { padding: 10px 20px; background: #f9f9f9; text-align: center; position: fixed; top: 0; width: 100%; border-bottom: 1px solid #ccc; }
   </style>
 </head>
 <body>
+  <div class="subscribe-container">
+    <button id="subscribe">🔔 Subscribe to Notifications</button>
+  </div>
+
   <div id="home" class="view active">
     <h2>Latest Message</h2>
     <p id="latestMessage">Loading...</p>
@@ -34,6 +40,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -49,20 +56,20 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const messaging = firebase.messaging();
 
     const latestMessageEl = document.getElementById("latestMessage");
     const historyList = document.getElementById("messageHistory");
 
+    // Real-time DB listener
     db.ref("messages").on("value", snapshot => {
       const data = snapshot.val();
       if (data) {
-        const entries = Object.entries(data);
-        const sorted = entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
-        const latest = sorted[0][1];
-
+        const entries = Object.entries(data).sort((a, b) => b[1].timestamp - a[1].timestamp);
+        const latest = entries[0][1];
         latestMessageEl.textContent = latest.text;
 
-        historyList.innerHTML = sorted.map(([id, msg]) =>
+        historyList.innerHTML = entries.map(([id, msg]) =>
           `<li><strong>${new Date(msg.timestamp).toLocaleString()}:</strong> ${msg.text}</li>`
         ).join("");
       }
@@ -72,6 +79,37 @@
       document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
       document.getElementById(tabId).classList.add("active");
     }
+
+    // Subscribe to push
+    document.getElementById("subscribe").addEventListener("click", async () => {
+      try {
+        const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        messaging.useServiceWorker(reg);
+
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") throw new Error("Permission not granted");
+
+        const token = await messaging.getToken({
+          vapidKey: "YOUR_PUBLIC_VAPID_KEY_HERE"
+        });
+        console.log("Push Token:", token);
+
+        // Store the token in the database
+        const safeKey = token.replace(/\W/g, "_");
+        await db.ref("pushTokens/" + safeKey).set({
+          token,
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.error("Subscription failed:", err);
+      }
+    });
+
+    // Foreground push
+    messaging.onMessage(payload => {
+      const { title, body } = payload.notification;
+      alert(`${title}\n\n${body}`);
+    });
   </script>
 </body>
 </html>
