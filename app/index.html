@@ -17,11 +17,20 @@
 
     html, body {
       height: 100%;
-      margin: 0;
-      padding: 0;
       font-family: sans-serif;
-      background-color: #ffffff;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+    }
+
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #ffffff;
     }
 
     .app {
@@ -48,13 +57,9 @@
       z-index: 9999;
     }
 
-    .notice i {
-      font-size: 1em;
-    }
-
     .view-title {
       position: fixed;
-      top: calc(calc(env(safe-area-inset-top) * 0.5) + 1em);
+      top: calc(env(safe-area-inset-top) + 1em);
       left: 0.7em;
       font-weight: bolder;
       font-size: 1.3em;
@@ -80,7 +85,7 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      background-color: white;
+      background-color: var(--bg-color);
       padding-bottom: calc(env(safe-area-inset-bottom) * 0.75);
       z-index: 1000;
     }
@@ -89,40 +94,24 @@
       display: flex;
       height: 60px;
       border-top: 1px solid #ccc;
-      background-color: white;
+      background-color: var(--bg-color);
       justify-content: space-around;
       align-items: center;
     }
 
     .tab {
-      position: relative;
       font-size: 1em;
       cursor: pointer;
       padding: 6px 12px;
       border-radius: 20px;
-      transition: all 0.2s;
       color: grey;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-    }
-
-    .tab i {
-      font-size: 1.6em;
-    }
-
-    .tab span {
-      font-size: 0.5625em;
-      margin-top: 2px;
     }
 
     .tab.active {
       color: #4da6ff;
-    }
-
-    .tab:active {
-      background-color: #eee;
     }
 
     .option-button {
@@ -148,9 +137,22 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
+    .darkmode-select {
+      margin-top: 10px;
+      font-size: 1em;
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .version {
+      padding: 10px;
+      font-size: 0.5em;
+      color: #aaa;
+    }
   </style>
 </head>
-<body style="background-color: white;">
+<body>
   <div id="web-app-notice" class="notice" style="display: none;">
     <i class="fa-solid fa-arrow-up-from-bracket"></i>
     Try adding to Home Screen
@@ -163,12 +165,16 @@
       <button class="option-button" data-option="2">Option 2</button>
       <button class="option-button" data-option="3">Option 3</button>
     </div>
-    <!-- <div id="view2" class="view">
-      <div class="view-title">Search</div>
-    </div> -->
     <div id="view3" class="view">
       <div class="view-title">Settings</div>
+      <label for="darkmode-select" style="margin-top: 20px; font-size: 0.8em;">Theme:</label>
+      <select id="darkmode-select" class="darkmode-select" onchange="updateDarkMode(this.value)">
+        <option value="system">System Default</option>
+        <option value="light">Light Mode</option>
+        <option value="dark">Dark Mode</option>
+      </select>
       <button class="reset-button" onclick="resetData()">Reset All Data</button>
+      <div class="version">Version 0.3</div>
     </div>
 
     <div class="tab-bar-wrapper">
@@ -177,10 +183,6 @@
           <i class="fa-solid fa-house"></i>
           <span>Home</span>
         </div>
-        <!-- <div class="tab" data-target="view2">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <span>Search</span>
-        </div> -->
         <div class="tab" data-target="view3">
           <i class="fa-solid fa-gear"></i>
           <span>Settings</span>
@@ -193,6 +195,8 @@
     const tabs = document.querySelectorAll('.tab');
     const views = document.querySelectorAll('.view');
     const optionButtons = document.querySelectorAll('.option-button');
+    const body = document.body;
+    const darkSelect = document.getElementById('darkmode-select');
 
     const getCookie = (name) => {
       const value = `; ${document.cookie}`;
@@ -207,6 +211,21 @@
     const deleteCookie = (name) => {
       document.cookie = `${name}=; Max-Age=0; path=/`;
     };
+
+    const updateDarkMode = (mode) => {
+      body.classList.remove('dark-mode');
+      if (mode === 'dark') {
+        body.classList.add('dark-mode');
+      } else if (mode === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) body.classList.add('dark-mode');
+      }
+      setCookie('darkMode', mode);
+    };
+
+    const savedMode = getCookie('darkMode') || 'system';
+    darkSelect.value = savedMode;
+    updateDarkMode(savedMode);
 
     const savedTab = getCookie('activeTab');
     if (savedTab) {
@@ -249,6 +268,7 @@
       if (confirm('Are you sure you want to erase all saved data?')) {
         deleteCookie('activeTab');
         deleteCookie('selectedOption');
+        deleteCookie('darkMode');
         location.reload();
       }
     }
