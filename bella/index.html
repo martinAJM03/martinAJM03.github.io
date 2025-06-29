@@ -9,12 +9,52 @@
   <link rel="apple-touch-icon" href="/icon-192.png" />
   <title>Message Viewer</title>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 0; }
-    .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #eee; border-top: 1px solid #ccc; }
-    .tab-bar button { flex: 1; padding: 15px; font-weight: bold; background: none; border: none; }
-    .view { padding: 60px 20px 100px; display: none; }
-    .view.active { display: block; }
-    .subscribe-container { padding: 10px 20px; background: #f9f9f9; text-align: center; position: fixed; top: 0; width: 100%; border-bottom: 1px solid #ccc; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .subscribe-container {
+      padding-top: calc(env(safe-area-inset-top, 20px) + 10px);
+      padding-bottom: 10px;
+      padding-left: 20px;
+      padding-right: 20px;
+      background: #f9f9f9;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      border-bottom: 1px solid #ccc;
+      z-index: 1000;
+    }
+
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background: #eee;
+      border-top: 1px solid #ccc;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .tab-bar button {
+      flex: 1;
+      padding: 15px;
+      font-weight: bold;
+      background: none;
+      border: none;
+    }
+
+    .view {
+      padding: calc(env(safe-area-inset-top, 20px) + 70px) 20px 100px;
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -61,7 +101,6 @@
     const latestMessageEl = document.getElementById("latestMessage");
     const historyList = document.getElementById("messageHistory");
 
-    // Real-time DB listener
     db.ref("messages").on("value", snapshot => {
       const data = snapshot.val();
       if (data) {
@@ -80,7 +119,6 @@
       document.getElementById(tabId).classList.add("active");
     }
 
-    // Subscribe to push
     document.getElementById("subscribe").addEventListener("click", async () => {
       try {
         const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
@@ -92,20 +130,20 @@
         const token = await messaging.getToken({
           vapidKey: "BN07ioUovpfrpdRjgFWguMlnzvFi0bJKorO3rtyJFHey4qO7bVOn3eAQQ2cDlkzf_HY-86UHVloE29rU1k6GiT4"
         });
-        console.log("Push Token:", token);
 
-        // Store the token in the database
         const safeKey = token.replace(/\W/g, "_");
         await db.ref("pushTokens/" + safeKey).set({
           token,
           timestamp: Date.now()
         });
+
+        alert("Push notifications enabled!");
       } catch (err) {
         console.error("Subscription failed:", err);
+        alert("Subscription failed. Check console for details.");
       }
     });
 
-    // Foreground push
     messaging.onMessage(payload => {
       const { title, body } = payload.notification;
       alert(`${title}\n\n${body}`);
