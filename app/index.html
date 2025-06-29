@@ -34,7 +34,7 @@
     .notice {
       position: fixed;
       top: 10px;
-      left: 10px;
+      right: 10px;
       background: #fff3cd;
       color: #856404;
       border: 1px solid #ffeeba;
@@ -51,14 +51,23 @@
       font-size: 1em;
     }
 
+    .view-title {
+      position: absolute;
+      top: 0.75em;
+      left: 1em;
+      font-weight: bold;
+      font-size: 1em;
+    }
+
     .view {
       flex: 1;
       display: none;
       justify-content: center;
       align-items: center;
       font-size: 1.5em;
-      padding: 1em;
+      padding: 2em 1em 1em 1em;
       flex-direction: column;
+      position: relative;
     }
 
     .view.active {
@@ -148,14 +157,16 @@
 
   <div class="app">
     <div id="view1" class="view active">
-      <div>Home View</div>
+      <div class="view-title">Home View</div>
       <button class="option-button" data-option="1">Option 1</button>
       <button class="option-button" data-option="2">Option 2</button>
       <button class="option-button" data-option="3">Option 3</button>
     </div>
-    <div id="view2" class="view">Search View</div>
+    <div id="view2" class="view">
+      <div class="view-title">Search View</div>
+    </div>
     <div id="view3" class="view">
-      Settings View
+      <div class="view-title">Settings View</div>
       <button class="reset-button" onclick="resetData()">Reset All Data</button>
     </div>
 
@@ -241,7 +252,6 @@
       }
     }
 
-    // Show notice only if not in standalone mode
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (!isStandalone) {
       document.getElementById('web-app-notice').style.display = 'flex';
