@@ -163,9 +163,9 @@
       <button class="option-button" data-option="2">Option 2</button>
       <button class="option-button" data-option="3">Option 3</button>
     </div>
-    <div id="view2" class="view">
+    <!-- <div id="view2" class="view">
       <div class="view-title">Search</div>
-    </div>
+    </div> -->
     <div id="view3" class="view">
       <div class="view-title">Settings</div>
       <button class="reset-button" onclick="resetData()">Reset All Data</button>
@@ -177,10 +177,10 @@
           <i class="fa-solid fa-house"></i>
           <span>Home</span>
         </div>
-        <div class="tab" data-target="view2">
+        <!-- <div class="tab" data-target="view2">
           <i class="fa-solid fa-magnifying-glass"></i>
           <span>Search</span>
-        </div>
+        </div> -->
         <div class="tab" data-target="view3">
           <i class="fa-solid fa-gear"></i>
           <span>Settings</span>
@@ -191,10 +191,10 @@
 
   <script>
     const tabs = document.querySelectorAll('.tab');
-    const viewsList = document.querySelectorAll('.view');
+    const views = document.querySelectorAll('.view');
     const optionButtons = document.querySelectorAll('.option-button');
 
-    const getCookie = name => {
+    const getCookie = (name) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
@@ -204,7 +204,7 @@
       document.cookie = `${name}=${value}; path=/`;
     };
 
-    const deleteCookie = name => {
+    const deleteCookie = (name) => {
       document.cookie = `${name}=; Max-Age=0; path=/`;
     };
 
@@ -214,7 +214,7 @@
       const targetView = document.getElementById(savedTab);
       if (targetTab && targetView) {
         tabs.forEach(t => t.classList.remove('active'));
-        viewsList.forEach(v => v.classList.remove('active'));
+        views.forEach(v => v.classList.remove('active'));
         targetTab.classList.add('active');
         targetView.classList.add('active');
       }
@@ -223,7 +223,7 @@
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
-        viewsList.forEach(v => v.classList.remove('active'));
+        views.forEach(v => v.classList.remove('active'));
         tab.classList.add('active');
         const targetId = tab.dataset.target;
         document.getElementById(targetId).classList.add('active');
