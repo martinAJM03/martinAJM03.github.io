@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Tab App</title>
@@ -16,8 +16,6 @@
 
     html, body {
       height: 100%;
-      margin: 0;
-      padding: 0;
       font-family: sans-serif;
       background-color: #ffffff;
       -webkit-tap-highlight-color: transparent;
@@ -50,26 +48,26 @@
       background-color: white;
       width: 100%;
       position: fixed;
-      bottom: 0;
       left: 0;
+      bottom: 0;
       z-index: 1000;
       justify-content: space-around;
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom);
+      padding-top: 4px;
     }
 
     .tab {
-      position: relative;
-      font-size: 1em;
-      cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 20px;
-      transition: all 0.2s;
-      color: grey;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      color: grey;
+      font-size: 1em;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
     .tab i {
@@ -89,19 +87,13 @@
       background-color: #eee;
     }
 
-    body::after {
-      content: "";
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
+    .safe-area-spacer {
       height: env(safe-area-inset-bottom);
       background-color: white;
-      z-index: 999;
     }
   </style>
 </head>
-<body style="background-color: white;">
+<body>
   <div class="app">
     <div id="view1" class="view active">Home View</div>
     <div id="view2" class="view">Search View</div>
@@ -121,6 +113,7 @@
         <span>Settings</span>
       </div>
     </div>
+    <div class="safe-area-spacer"></div>
   </div>
 
   <script>
@@ -133,9 +126,4 @@
         tabViews.forEach(v => v.classList.remove('active'));
 
         tab.classList.add('active');
-        document.getElementById(tab.dataset.target).classList.add('active');
-      });
-    });
-  </script>
-</body>
-</html>
+        document.getElementById(tab.dataset.target).classList.add('activ
