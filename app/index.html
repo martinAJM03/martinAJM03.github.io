@@ -108,6 +108,16 @@
       background-color: #4da6ff;
       color: white;
     }
+
+    .reset-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body style="background-color: white;">
@@ -119,7 +129,10 @@
       <button class="option-button" data-option="3">Option 3</button>
     </div>
     <div id="view2" class="view">Search View</div>
-    <div id="view3" class="view">Settings View</div>
+    <div id="view3" class="view">
+      Settings View
+      <button class="reset-button" onclick="resetData()">Reset All Data</button>
+    </div>
 
     <div class="tab-bar-wrapper">
       <div class="tab-bar">
@@ -144,15 +157,27 @@
     const viewsList = document.querySelectorAll('.view');
     const optionButtons = document.querySelectorAll('.option-button');
 
-    // Restore active tab from cookie
-    const savedTab = document.cookie.split('; ').find(row => row.startsWith('activeTab='));
+    const getCookie = name => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+
+    const setCookie = (name, value) => {
+      document.cookie = `${name}=${value}; path=/`;
+    };
+
+    const deleteCookie = name => {
+      document.cookie = `${name}=; Max-Age=0; path=/`;
+    };
+
+    const savedTab = getCookie('activeTab');
     if (savedTab) {
-      const target = savedTab.split('=')[1];
-      tabs.forEach(t => t.classList.remove('active'));
-      viewsList.forEach(v => v.classList.remove('active'));
-      const targetTab = document.querySelector(`.tab[data-target="${target}"]`);
-      const targetView = document.getElementById(target);
+      const targetTab = document.querySelector(`.tab[data-target="${savedTab}"]`);
+      const targetView = document.getElementById(savedTab);
       if (targetTab && targetView) {
+        tabs.forEach(t => t.classList.remove('active'));
+        viewsList.forEach(v => v.classList.remove('active'));
         targetTab.classList.add('active');
         targetView.classList.add('active');
       }
@@ -162,31 +187,34 @@
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         viewsList.forEach(v => v.classList.remove('active'));
-
         tab.classList.add('active');
         const targetId = tab.dataset.target;
         document.getElementById(targetId).classList.add('active');
-        document.cookie = `activeTab=${targetId}; path=/`;
+        setCookie('activeTab', targetId);
       });
     });
 
-    // Restore active option from cookie
-    const savedOption = document.cookie.split('; ').find(row => row.startsWith('selectedOption='));
+    const savedOption = getCookie('selectedOption');
     if (savedOption) {
-      const selectedValue = savedOption.split('=')[1];
-      const savedBtn = document.querySelector(`.option-button[data-option="${selectedValue}"]`);
-      if (savedBtn) {
-        savedBtn.classList.add('active');
-      }
+      const savedBtn = document.querySelector(`.option-button[data-option="${savedOption}"]`);
+      if (savedBtn) savedBtn.classList.add('active');
     }
 
     optionButtons.forEach(button => {
       button.addEventListener('click', () => {
         optionButtons.forEach(b => b.classList.remove('active'));
         button.classList.add('active');
-        document.cookie = `selectedOption=${button.dataset.option}; path=/`;
+        setCookie('selectedOption', button.dataset.option);
       });
     });
+
+    function resetData() {
+      if (confirm('Are you sure you want to erase all saved data?')) {
+        deleteCookie('activeTab');
+        deleteCookie('selectedOption');
+        location.reload();
+      }
+    }
   </script>
 </body>
 </html>
