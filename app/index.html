@@ -38,6 +38,7 @@
       align-items: center;
       font-size: 1.5em;
       padding: 1em;
+      flex-direction: column;
     }
 
     .view.active {
@@ -93,11 +94,30 @@
     .tab:active {
       background-color: #eee;
     }
+
+    .option-button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .option-button.active {
+      background-color: #4da6ff;
+      color: white;
+    }
   </style>
 </head>
 <body style="background-color: white;">
   <div class="app">
-    <div id="view1" class="view active">Home View</div>
+    <div id="view1" class="view active">
+      <div>Home View</div>
+      <button class="option-button" data-option="1">Option 1</button>
+      <button class="option-button" data-option="2">Option 2</button>
+      <button class="option-button" data-option="3">Option 3</button>
+    </div>
     <div id="view2" class="view">Search View</div>
     <div id="view3" class="view">Settings View</div>
 
@@ -122,6 +142,21 @@
   <script>
     const tabs = document.querySelectorAll('.tab');
     const viewsList = document.querySelectorAll('.view');
+    const optionButtons = document.querySelectorAll('.option-button');
+
+    // Restore active tab from cookie
+    const savedTab = document.cookie.split('; ').find(row => row.startsWith('activeTab='));
+    if (savedTab) {
+      const target = savedTab.split('=')[1];
+      tabs.forEach(t => t.classList.remove('active'));
+      viewsList.forEach(v => v.classList.remove('active'));
+      const targetTab = document.querySelector(`.tab[data-target="${target}"]`);
+      const targetView = document.getElementById(target);
+      if (targetTab && targetView) {
+        targetTab.classList.add('active');
+        targetView.classList.add('active');
+      }
+    }
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -129,7 +164,27 @@
         viewsList.forEach(v => v.classList.remove('active'));
 
         tab.classList.add('active');
-        document.getElementById(tab.dataset.target).classList.add('active');
+        const targetId = tab.dataset.target;
+        document.getElementById(targetId).classList.add('active');
+        document.cookie = `activeTab=${targetId}; path=/`;
+      });
+    });
+
+    // Restore active option from cookie
+    const savedOption = document.cookie.split('; ').find(row => row.startsWith('selectedOption='));
+    if (savedOption) {
+      const selectedValue = savedOption.split('=')[1];
+      const savedBtn = document.querySelector(`.option-button[data-option="${selectedValue}"]`);
+      if (savedBtn) {
+        savedBtn.classList.add('active');
+      }
+    }
+
+    optionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        optionButtons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        document.cookie = `selectedOption=${button.dataset.option}; path=/`;
       });
     });
   </script>
