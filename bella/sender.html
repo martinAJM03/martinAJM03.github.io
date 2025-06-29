@@ -1,0 +1,47 @@
+<!-- sender.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Send Message</title>
+</head>
+<body>
+  <h1>Send a Message</h1>
+  <input type="text" id="messageInput" placeholder="Type your message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDF0gDMsDI5UJgsbVbr4pYihrPR1-RGZ98",
+      authDomain: "ilovebella-app.firebaseapp.com",
+      databaseURL: "https://ilovebella-app-default-rtdb.firebaseio.com",
+      projectId: "ilovebella-app",
+      storageBucket: "ilovebella-app.firebasestorage.app",
+      messagingSenderId: "206728036145",
+      appId: "1:206728036145:web:b9bfb173f69a43da66ba10",
+      measurementId: "G-30LDH4ZWGP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const message = input.value.trim();
+      if (!message) return alert("Please enter a message.");
+      
+      db.ref("messages").push({
+        text: message,
+        timestamp: Date.now()
+      });
+
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
