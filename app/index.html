@@ -59,6 +59,14 @@
       font-size: 1.3em;
     }
 
+    .top-buttons {
+      position: fixed;
+      top: calc(env(safe-area-inset-top) + 1em);
+      right: 0.7em;
+      display: flex;
+      gap: 10px;
+    }
+
     .view {
       flex: 1;
       display: none;
@@ -124,13 +132,14 @@
       background-color: #eee;
     }
 
-    .option-button {
+    .option-button, .launcher-button {
       padding: 10px 20px;
       margin: 10px;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 1em;
       cursor: pointer;
+      position: relative;
     }
 
     .option-button.active {
@@ -146,6 +155,24 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.8em;
+      display: none;
+    }
+
+    .launcher-button.edit-mode .delete-btn {
+      display: block;
     }
 
     .version {
@@ -168,10 +195,20 @@
       <button class="option-button" data-option="2">Option 2</button>
       <button class="option-button" data-option="3">Option 3</button>
     </div>
+
+    <div id="view2" class="view">
+      <div class="view-title">Launcher</div>
+      <div class="top-buttons">
+        <button onclick="addLauncher()"><i class="fa-solid fa-plus"></i></button>
+        <button onclick="toggleEditMode()"><i class="fa-solid fa-pen"></i></button>
+      </div>
+      <div id="launcher-stack"></div>
+    </div>
+
     <div id="view3" class="view">
       <div class="view-title">Settings</div>
       <button class="reset-button" onclick="resetData()">Reset All Data</button>
-      <div class="version">Version 0.4</div>
+      <div class="version">Version 0.6</div>
     </div>
 
     <div class="tab-bar-wrapper">
@@ -179,6 +216,10 @@
         <div class="tab active" data-target="view1">
           <i class="fa-solid fa-house"></i>
           <span>Home</span>
+        </div>
+        <div class="tab" data-target="view2">
+          <i class="fa-solid fa-rocket"></i>
+          <span>Launcher</span>
         </div>
         <div class="tab" data-target="view3">
           <i class="fa-solid fa-gear"></i>
@@ -192,6 +233,8 @@
     const tabs = document.querySelectorAll('.tab');
     const views = document.querySelectorAll('.view');
     const optionButtons = document.querySelectorAll('.option-button');
+    let launcherItems = JSON.parse(localStorage.getItem('launcherItems') || '[]');
+    let isEditing = false;
 
     const getCookie = (name) => {
       const value = `; ${document.cookie}`;
@@ -248,9 +291,56 @@
       if (confirm('Are you sure you want to erase all saved data?')) {
         deleteCookie('activeTab');
         deleteCookie('selectedOption');
+        localStorage.removeItem('launcherItems');
         location.reload();
       }
     }
+
+    function addLauncher() {
+      const name = prompt('Enter name:');
+      const url = prompt('Enter URL:');
+      if (name && url) {
+        launcherItems.push({ name, url });
+        localStorage.setItem('launcherItems', JSON.stringify(launcherItems));
+        renderLauncher();
+      }
+    }
+
+    function deleteLauncher(index) {
+      launcherItems.splice(index, 1);
+      localStorage.setItem('launcherItems', JSON.stringify(launcherItems));
+      renderLauncher();
+    }
+
+    function toggleEditMode() {
+      isEditing = !isEditing;
+      renderLauncher();
+    }
+
+    function renderLauncher() {
+      const container = document.getElementById('launcher-stack');
+      container.innerHTML = '';
+      launcherItems.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'launcher-button';
+        btn.textContent = item.name;
+        btn.onclick = () => window.open(item.url, '_blank');
+        if (isEditing) {
+          btn.classList.add('edit-mode');
+          const x = document.createElement('button');
+          x.textContent = 'X';
+          x.className = 'delete-btn';
+          x.onclick = (e) => {
+            e.stopPropagation();
+            deleteLauncher(index);
+          };
+          btn.appendChild(x);
+        }
+        container.appendChild(btn);
+      });
+    }
+
+    renderLauncher();
 
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (!isStandalone) {
