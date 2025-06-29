@@ -14,7 +14,6 @@
       margin: 0;
       padding: 0;
     }
-
     html, body {
       height: 100%;
       font-family: sans-serif;
@@ -22,7 +21,6 @@
       color: black;
       -webkit-tap-highlight-color: transparent;
     }
-
     .app {
       display: flex;
       flex-direction: column;
@@ -30,11 +28,10 @@
       padding-top: calc(env(safe-area-inset-top) * 0.5);
       padding-bottom: calc(60px + env(safe-area-inset-bottom) * 0.75);
     }
-
     .notice {
       position: fixed;
-      top: 10px;
-      right: 10px;
+      bottom: 60px;
+      left: 10px;
       background: #fff3cd;
       color: #856404;
       border: 1px solid #ffeeba;
@@ -46,11 +43,9 @@
       gap: 5px;
       z-index: 9999;
     }
-
     .notice i {
       font-size: 1em;
     }
-
     .view-title {
       position: fixed;
       top: calc(calc(env(safe-area-inset-top) * 0.5) + 1em);
@@ -58,7 +53,6 @@
       font-weight: bolder;
       font-size: 1.3em;
     }
-
     .top-buttons {
       position: fixed;
       top: calc(env(safe-area-inset-top) + 1em);
@@ -66,7 +60,37 @@
       display: flex;
       gap: 10px;
     }
-
+    .top-buttons button {
+      font-size: 0.9em;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .launcher-form {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 2em;
+      font-size: 0.8em;
+    }
+    .launcher-form input {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    .launcher-form button {
+      padding: 6px 12px;
+      border: none;
+      background-color: #4da6ff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .launcher-form .error {
+      color: red;
+      font-size: 0.8em;
+    }
     .view {
       flex: 1;
       display: none;
@@ -77,11 +101,9 @@
       flex-direction: column;
       position: relative;
     }
-
     .view.active {
       display: flex;
     }
-
     .tab-bar-wrapper {
       position: fixed;
       bottom: 0;
@@ -91,7 +113,6 @@
       padding-bottom: calc(env(safe-area-inset-bottom) * 0.75);
       z-index: 1000;
     }
-
     .tab-bar {
       display: flex;
       height: 60px;
@@ -100,9 +121,7 @@
       justify-content: space-around;
       align-items: center;
     }
-
     .tab {
-      position: relative;
       font-size: 1em;
       cursor: pointer;
       padding: 6px 12px;
@@ -112,26 +131,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
-
-    .tab i {
-      font-size: 1.6em;
-    }
-
-    .tab span {
-      font-size: 0.5625em;
-      margin-top: 2px;
-    }
-
-    .tab.active {
-      color: #4da6ff;
-    }
-
-    .tab:active {
-      background-color: #eee;
-    }
-
+    .tab i { font-size: 1.6em; }
+    .tab span { font-size: 0.5625em; margin-top: 2px; }
+    .tab.active { color: #4da6ff; }
+    .tab:active { background-color: #eee; }
     .option-button, .launcher-button {
       padding: 10px 20px;
       margin: 10px;
@@ -141,12 +145,10 @@
       cursor: pointer;
       position: relative;
     }
-
     .option-button.active {
       background-color: #4da6ff;
       color: white;
     }
-
     .reset-button {
       margin-top: 20px;
       padding: 10px 20px;
@@ -156,7 +158,6 @@
       border-radius: 8px;
       cursor: pointer;
     }
-
     .delete-btn {
       position: absolute;
       top: -8px;
@@ -170,11 +171,9 @@
       font-size: 0.8em;
       display: none;
     }
-
     .launcher-button.edit-mode .delete-btn {
       display: block;
     }
-
     .version {
       padding: 10px;
       font-size: 0.5em;
@@ -187,7 +186,6 @@
     <i class="fa-solid fa-arrow-up-from-bracket"></i>
     Try adding to Home Screen
   </div>
-
   <div class="app">
     <div id="view1" class="view active">
       <div class="view-title">Home</div>
@@ -195,22 +193,25 @@
       <button class="option-button" data-option="2">Option 2</button>
       <button class="option-button" data-option="3">Option 3</button>
     </div>
-
     <div id="view2" class="view">
       <div class="view-title">Launcher</div>
       <div class="top-buttons">
-        <button onclick="addLauncher()"><i class="fa-solid fa-plus"></i></button>
-        <button onclick="toggleEditMode()"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="toggleLauncherForm()"><i class="fa-solid fa-plus"></i></button>
+        <button id="editToggle" onclick="toggleEditMode()">Edit</button>
+      </div>
+      <div class="launcher-form" id="launcher-form">
+        <input id="launcher-name" type="text" placeholder="Name" />
+        <input id="launcher-url" type="url" placeholder="URL" />
+        <button onclick="submitLauncher()">Submit</button>
+        <div id="launcher-error" class="error"></div>
       </div>
       <div id="launcher-stack"></div>
     </div>
-
     <div id="view3" class="view">
       <div class="view-title">Settings</div>
       <button class="reset-button" onclick="resetData()">Reset All Data</button>
-      <div class="version">Version 0.6</div>
+      <div class="version">Version 0.7</div>
     </div>
-
     <div class="tab-bar-wrapper">
       <div class="tab-bar">
         <div class="tab active" data-target="view1">
@@ -228,27 +229,21 @@
       </div>
     </div>
   </div>
-
   <script>
     const tabs = document.querySelectorAll('.tab');
     const views = document.querySelectorAll('.view');
     const optionButtons = document.querySelectorAll('.option-button');
     let launcherItems = JSON.parse(localStorage.getItem('launcherItems') || '[]');
     let isEditing = false;
+    const form = document.getElementById('launcher-form');
 
     const getCookie = (name) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
     };
-
-    const setCookie = (name, value) => {
-      document.cookie = `${name}=${value}; path=/`;
-    };
-
-    const deleteCookie = (name) => {
-      document.cookie = `${name}=; Max-Age=0; path=/`;
-    };
+    const setCookie = (name, value) => { document.cookie = `${name}=${value}; path=/`; };
+    const deleteCookie = (name) => { document.cookie = `${name}=; Max-Age=0; path=/`; };
 
     const savedTab = getCookie('activeTab');
     if (savedTab) {
@@ -296,14 +291,26 @@
       }
     }
 
-    function addLauncher() {
-      const name = prompt('Enter name:');
-      const url = prompt('Enter URL:');
-      if (name && url) {
-        launcherItems.push({ name, url });
-        localStorage.setItem('launcherItems', JSON.stringify(launcherItems));
-        renderLauncher();
+    function toggleLauncherForm() {
+      form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function submitLauncher() {
+      const name = document.getElementById('launcher-name').value.trim();
+      const url = document.getElementById('launcher-url').value.trim();
+      const errorDiv = document.getElementById('launcher-error');
+
+      if (!name || !url) {
+        errorDiv.textContent = 'Both fields are required.';
+        return;
       }
+      errorDiv.textContent = '';
+      launcherItems.push({ name, url });
+      localStorage.setItem('launcherItems', JSON.stringify(launcherItems));
+      renderLauncher();
+      document.getElementById('launcher-name').value = '';
+      document.getElementById('launcher-url').value = '';
+      form.style.display = 'none';
     }
 
     function deleteLauncher(index) {
@@ -314,6 +321,7 @@
 
     function toggleEditMode() {
       isEditing = !isEditing;
+      document.getElementById('editToggle').textContent = isEditing ? 'Done' : 'Edit';
       renderLauncher();
     }
 
