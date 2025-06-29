@@ -43,19 +43,23 @@
       display: flex;
     }
 
+    .tab-bar-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 1000;
+    }
+
     .tab-bar {
       display: flex;
       height: 60px;
       border-top: 1px solid #ccc;
       background-color: white;
-      width: 100%;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      z-index: 1000;
       justify-content: space-around;
       align-items: center;
-      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .tab {
@@ -88,17 +92,6 @@
     .tab:active {
       background-color: #eee;
     }
-
-    body::after {
-      content: "";
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: env(safe-area-inset-bottom);
-      background-color: white;
-      z-index: 999;
-    }
   </style>
 </head>
 <body style="background-color: white;">
@@ -107,18 +100,20 @@
     <div id="view2" class="view">Search View</div>
     <div id="view3" class="view">Settings View</div>
 
-    <div class="tab-bar">
-      <div class="tab active" data-target="view1">
-        <i class="fa-solid fa-house"></i>
-        <span>Home</span>
-      </div>
-      <div class="tab" data-target="view2">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <span>Search</span>
-      </div>
-      <div class="tab" data-target="view3">
-        <i class="fa-solid fa-gear"></i>
-        <span>Settings</span>
+    <div class="tab-bar-wrapper">
+      <div class="tab-bar">
+        <div class="tab active" data-target="view1">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </div>
+        <div class="tab" data-target="view2">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Search</span>
+        </div>
+        <div class="tab" data-target="view3">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </div>
       </div>
     </div>
   </div>
