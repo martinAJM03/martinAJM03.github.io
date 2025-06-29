@@ -1,0 +1,77 @@
+<!-- receiver.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Message Viewer</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; }
+    .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #eee; border-top: 1px solid #ccc; }
+    .tab-bar button { flex: 1; padding: 15px; font-weight: bold; background: none; border: none; }
+    .view { padding: 60px 20px 80px; display: none; }
+    .view.active { display: block; }
+  </style>
+</head>
+<body>
+  <div id="home" class="view active">
+    <h2>Latest Message</h2>
+    <p id="latestMessage">Loading...</p>
+  </div>
+
+  <div id="history" class="view">
+    <h2>Message History</h2>
+    <ul id="messageHistory"></ul>
+  </div>
+
+  <div class="tab-bar">
+    <button onclick="switchTab('home')">Home</button>
+    <button onclick="switchTab('history')">History</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDF0gDMsDI5UJgsbVbr4pYihrPR1-RGZ98",
+      authDomain: "ilovebella-app.firebaseapp.com",
+      databaseURL: "https://ilovebella-app-default-rtdb.firebaseio.com",
+      projectId: "ilovebella-app",
+      storageBucket: "ilovebella-app.firebasestorage.app",
+      messagingSenderId: "206728036145",
+      appId: "1:206728036145:web:b9bfb173f69a43da66ba10",
+      measurementId: "G-30LDH4ZWGP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const latestMessageEl = document.getElementById("latestMessage");
+    const historyList = document.getElementById("messageHistory");
+
+    db.ref("messages").on("value", snapshot => {
+      const data = snapshot.val();
+      if (data) {
+        const entries = Object.entries(data);
+        const sorted = entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+        const latest = sorted[0][1];
+
+        latestMessageEl.textContent = latest.text;
+
+        historyList.innerHTML = sorted.map(([id, msg]) =>
+          `<li><strong>${new Date(msg.timestamp).toLocaleString()}:</strong> ${msg.text}</li>`
+        ).join("");
+      }
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+    }
+  </script>
+</body>
+</html>
