@@ -24,17 +24,11 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    body::before {
-      content: "";
-      display: block;
-      height: calc(env(safe-area-inset-top) * 0.5);
-      background-color: white;
-    }
-
     .app {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      padding-top: calc(env(safe-area-inset-top) * 0.5);
       padding-bottom: calc(60px + env(safe-area-inset-bottom) * 0.75);
     }
 
