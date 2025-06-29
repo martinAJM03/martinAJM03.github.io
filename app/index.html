@@ -241,8 +241,9 @@
       }
     }
 
-    // Show notice if not in standalone (home screen) mode
-    if (window.matchMedia('(display-mode: browser)').matches || !window.navigator.standalone) {
+    // Show notice only if not in standalone mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (!isStandalone) {
       document.getElementById('web-app-notice').style.display = 'flex';
     }
   </script>
