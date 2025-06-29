@@ -49,11 +49,12 @@
       background-color: white;
       width: 100%;
       position: fixed;
-      bottom: env(safe-area-inset-bottom, 0);
+      bottom: 0;
       left: 0;
       z-index: 1000;
       justify-content: space-around;
       align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0);
     }
 
     .tab {
@@ -72,6 +73,18 @@
 
     .tab:active {
       background-color: #eee;
+    }
+
+    /* Fill safe-area space behind tab bar */
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: env(safe-area-inset-bottom);
+      background-color: white;
+      z-index: 999;
     }
   </style>
 </head>
