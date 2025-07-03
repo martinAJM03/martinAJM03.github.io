@@ -261,15 +261,17 @@
     let editingIndex = -1;
     const overlay = document.getElementById('launcher-overlay');
 
-    function checkAndUpdate() {
-      if (navigator.onLine) {
-        window.location.reload();
-      } else {
+    function checkAndUpdate(event) {
+      if (!navigator.onLine) {
+        event.preventDefault();
         const popup = document.getElementById('error-popup');
         popup.style.display = 'flex';
         setTimeout(() => popup.style.display = 'none', 3000);
+        return;
       }
+      window.location.reload();
     }
+
     
     function toggleLauncherForm() {
       overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
