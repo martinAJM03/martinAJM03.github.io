@@ -226,6 +226,17 @@
       <button class="update-button" onclick="window.location.reload()">Update</button>
       <div class="version">Version 0.15</div>
     </div>
+    <div id="view4" class="view">
+      <div class="view-title">Clicker</div>
+      <div style="margin-top: 4em; text-align: center;">
+        <div id="click-count" style="font-size: 2em; margin-bottom: 1em;">0</div>
+        <button onclick="incrementCookieClick()" style="font-size: 2em; padding: 1em; border-radius: 50%; background: #f4c542; border: none; cursor: pointer;">
+          🍪
+        </button>
+        <br/><br/>
+        <button onclick="resetCookieClick()" class="reset-button">Reset Cookie Count</button>
+      </div>
+    </div>
     <div class="tab-bar-wrapper">
       <div class="tab-bar">
         <div class="tab active" data-target="view1">
@@ -235,6 +246,10 @@
         <div class="tab" data-target="view2">
           <i class="fa-solid fa-rocket"></i>
           <span>Launcher</span>
+        </div>
+        <div class="tab" data-target="view4">
+          <i class="fa-solid fa-cookie"></i>
+          <span>Clicker</span>
         </div>
         <div class="tab" data-target="view3">
           <i class="fa-solid fa-gear"></i>
@@ -407,6 +422,35 @@
     if (!isStandalone) {
       document.getElementById('web-app-notice').style.display = 'flex';
     }
+    
+    <!-- Cookie Clicker -->
+    function incrementCookieClick() {
+      let count = parseInt(getCookie('cookieClickCount') || '0');
+      count++;
+      setCookie('cookieClickCount', count);
+      document.getElementById('click-count').textContent = count;
+    }
+
+    function resetCookieClick() {
+      setCookie('cookieClickCount', 0);
+      document.getElementById('click-count').textContent = '0';
+    }
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function setCookie(name, value) {
+      document.cookie = `${name}=${value}; path=/`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const count = getCookie('cookieClickCount') || '0';
+      const display = document.getElementById('click-count');
+      if (display) display.textContent = count;
+    });
   </script>
 </body>
 </html>
