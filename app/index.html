@@ -427,12 +427,12 @@
     function incrementCookieClick() {
       let count = parseInt(getCookieValue('cookieClickCount') || '0');
       count++;
-      setCookie('cookieClickCount', count);
+      setCookieValue('cookieClickCount', count);
       document.getElementById('click-count').textContent = count;
     }
 
     function resetCookieClick() {
-      setCookie('cookieClickCount', 0);
+      setCookieValue('cookieClickCount', 0);
       document.getElementById('click-count').textContent = '0';
     }
 
@@ -442,7 +442,7 @@
       if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    function setCookie(name, value) {
+    function setCookieValue(name, value) {
       document.cookie = `${name}=${value}; path=/`;
     }
 
