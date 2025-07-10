@@ -5,6 +5,8 @@ body {
   background-color: black;
   color: white;
   text-align: center;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 p {
