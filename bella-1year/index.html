@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <title>Tab App</title>
+  <script src="scripts.js" defer></script>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <!--<div class="view" id="blank"><p>Add app to home screen</p></div>-->
+    <div class="view active" id="view-home">
+      <img class="background" src="bella.png"></img>
+      <div class="button-stack center">
+        <button class="home-button" data-target="view-1">i love my bella</button>
+        <button class="home-button" data-target="view-2">she is very cool</button>
+        <button class="home-button" data-target="view-3">i love her like no otter</button>
+        <button class="home-button" data-target="view-sal">sal button</button>
+      </div>
+    </div>
+    <div class="view" id="view-sal">
+      <button class="back-button" data-target="home-view">&lt; Back</button>
+      <img class="background" src="sal.png"></img>
+      <div class="button-stack center">
+        <button class="home-button">this guy's name is sal</button>
+        <button class="home-button">he is very cool</button>
+        <button class="home-button">he is a joker</button>
+      </div>
+    </div>
+    <div class="view" id="view-1">
+      <button class="back-button" data-target="home-view">&lt; Back</button>
+      <p>
+        I love my Bella so darn much. Even when she sometimes makes me mad, or gets mad at me for things that I'm clueless of, she is always going to be the love of my life. No matter how many times I feel like it's the end of the world, I always seem to forget about it. Bella is the person I want to start and end my day with, and everything in between.
+      </p>
+    </div>
+    <div class="view" id="view-2">
+      <button class="back-button" data-target="home-view">&lt; Back</button>
+        <p>
+          My Bella is the coolest girl in the world. She knows how to do karate and played a lot of sports. She even puts sunglasses on the top of her head for later when it gets bright (that's pretty cool). She has lots of cool clothing, though I sometimes disagree. They fill her entire closet and leave her with glee! Her eyes are super pretty, with a splash of blue and grey. Her smile's like the sun, it's always brightening my day. I don't know why I turned that into a poem, but I was feeling very poetic just by the thought of her.
+        </p>
+    </div>
+    <div class="view" id="view-3">
+      <button class="back-button" data-target="home-view">&lt; Back</button>
+        <p>
+          I love her like no other, more than anyone in the world. She's the only one on my mind, as no other girl could every make me as happy as she does. I know I have my moments, and sometimes I feel like I'm not showing enough love. But she's the one I am looking forward to marrying. I want to give her the best I possibly can. It's a slow process, but it's going to be great in the end. I'm doing it for her, because she's 1000% worth it to me.
+        </p>
+    </div>
+  </div>
+</body>
+</html>
