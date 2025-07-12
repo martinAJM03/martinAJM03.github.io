@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Live Server</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="scripts.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+
+      <div class="view active" id="home">
+        <div class="view-title">Home</div>
+        <img src="bella.jpg"></div>
+        <div class="home-option-box">
+          <button class="home-option" data-target="photo-upload">Photo Upload</button>
+        </div>
+      </div>
+
+      <div class="view" id="photo-upload">
+        <div class="view-title">Photo Upload</div>
+        <button class="back-button" data-target="home"><span class="fa-solid fa-chevron-left"></span> Back
+        </button><button class="info" onclick="alert('This app is used to allow me to upload images across devices (specifically from my phone to my computer). Only works for one image at a time, but that is enough for my needs.')"><span class="fa-solid fa-circle-info"></span></button>
+        <div class="image-upload-box">
+          <button id="select-button">Choose Image</button>
+          <input type="file" id="image-input" accept="image/*" style="display: none;">
+          <span id="fileName">No file chosen</span>
+            <button id="submit-button">Submit</button>
+            <h2>Image Output:</h2>
+            <div class="image-view">
+              <img id="latest-image" alt="No image">
+              <span>
+                <button id="download-image">Download</button>
+                <button id="delete-image" style="color:red;">Delete</button>
+              </span>
+            </div>
+        </div>
+      </div>
+
+      <div class="view" id="settings">
+        <div class="view-title">Settings</div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab active" data-target="home" id="tab-home">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </div>
+        <div class="tab" data-target="settings" id="tab-settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>
