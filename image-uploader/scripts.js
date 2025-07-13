@@ -54,8 +54,10 @@ homeOpts.forEach(homeOpt => {
 
 back.forEach(back => {
   back.addEventListener("click", () => {
+    const targetId = back.dataset.target;
     views.forEach(v => v.classList.remove('active'));
       document.getElementById('home').classList.add('active');
+      setCookie("activeTab", targetId);
   });
 });
 
@@ -150,7 +152,7 @@ downloadBtn.addEventListener('click', () => {
 
   const link = document.createElement('a');
   link.href = imageSrc;
-  link.download = 'latest-image'; // You can change the filename here
+  link.download = 'image-upload'; // You can change the filename here
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

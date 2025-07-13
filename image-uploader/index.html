@@ -27,8 +27,8 @@
 
       <div class="view" id="photo-upload">
         <div class="view-title">Photo Upload</div>
-        <button class="back-button" data-target="home"><span class="fa-solid fa-chevron-left"></span> Back
-        </button><button class="info" onclick="alert('This app is used to allow me to upload images across devices (specifically from my phone to my computer). Only works for one image at a time, but that is enough for my needs.')"><span class="fa-solid fa-circle-info"></span></button>
+        <!--<button class="back-button" data-target="home"><span class="fa-solid fa-chevron-left"></span> Back</button>-->
+        <button class="info" onclick="alert('This app is used to allow me to upload images across devices (specifically from my phone to my computer). Only works for one image at a time, but that is enough for my needs.')"><span class="fa-solid fa-circle-info"></span></button>
         <div class="image-upload-box">
           <button id="select-button">Choose Image</button>
           <input type="file" id="image-input" accept="image/*" style="display: none;">
@@ -50,9 +50,13 @@
       </div>
 
       <div class="tabbar">
-        <div class="tab active" data-target="home" id="tab-home">
+        <!--<div class="tab" data-target="home" id="tab-home">
           <i class="fa-solid fa-house"></i>
           <span>Home</span>
+        </div>-->
+        <div class="tab active" data-target="photo-upload" id="tab-upload">
+          <i class="fa-solid fa-camera"></i>
+          <span>Upload</span>
         </div>
         <div class="tab" data-target="settings" id="tab-settings">
           <i class="fa-solid fa-gear"></i>
