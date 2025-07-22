@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lage="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Resident Portal</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#262527">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css"/>
+    <script type="module" src="script.js" defer></script>
+    <script src="whiteboard.js" defer></script>
+    <script src="notification.js" defer></script>
+    <script>navigator.serviceWorker.register("service-worker.js")</script> 
+    <link rel="manifest" href="manifest.json" />  
+  </head>
+  <body>
+    <div class="app">
 
+      <div class="top-bar">
+        <div class="view-title"></div>
+        <div class="top-buttons">
+          <div id="notifs" class="fa-regular fa-bell"></div>
+          <div id="settings-button" class="fa-regular fa-gear" data-target="settings"></div>
+        </div>
+      </div>
+
+      <div class="view" id="home" data-title="Home">
+        <p>this will contain the home screen</p>
+        <p><b>Live Message:</b> <span id="liveMessage"></span></p>
+        <textarea id="message-input" type="text" placeholder="Enter message here"></textarea>
+      </div>
+
+      <div class="view" id="payments" data-title="Payments">
+        <div class="payment-container">
+          <div class="amount-due">
+            <div class="amount-container">
+              <p>No Amount Due</p>
+              <p class="dollar-amount">$0.00&nbsp;<span class="fa-regular fa-info-circle"></span></p>
+            </div>
+            <button class="pay-now" onclick="alert('cum')">Pay Now</button>
+          </div>
+          <div class="divider"></div>
+          <div class="payment-settings"></div>
+        </div>
+      </div>
+
+      <div class="view" id="whiteboard" data-title="Whiteboard">
+        <button class="reset" onclick="clearCanvas()">Reset</button>
+        <canvas id="board"></canvas>
+      </div>
+
+      <div class="view" id="schedule" data-title="Contact Property">
+        <p>this will contain a message box</p>
+      </div>
+
+      <div class="view" id="menu" data-title="Menu">
+        <p>this will contain the menu items</p>
+      </div>
+
+      <div class="view" id="settings" data-title="Settings">
+        <div class="login-container loggedin">
+          <input id="username" type="text" placeholder="username">
+          <div class="login-buttons">
+            <button class="log-in" onclick="login()">Log In</button>
+            <button class="sign-up" onclick="signup()">Sign Up</button>
+          </div>
+        </div> 
+        <div class="login-details loggedin">
+          <p>Logged in as: <span id="currentUser"></span></p>
+          <button class="log-out" onclick="logout()">Log out</button>
+          <button class="log-out" onclick="deleteUser()">Delete Account</button>
+        </div>
+        <button class="log-out" style="background-color: rgb(58, 211, 211); width: 30em; margin:auto;" id="notifButton">Notification</button>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab" data-target="home">
+          <div id="tab-icon" class="fa-regular fa-house"></div>
+          <p>Home</p>
+        </div>
+        <div class="tab active" data-target="payments">
+          <div id="tab-icon" class="fa-regular fa-credit-card"></div>
+          <p>Payments</p>
+        </div>
+        <div class="tab" data-target="whiteboard">
+          <div id="tab-icon" class="fa-regular fa-pen"></div>
+          <p>Whiteboard</p>
+        </div>
+        <div class="tab" data-target="schedule">
+          <div id="tab-icon" class="fa-regular fa-envelope"></div>
+          <p>Schedule</p>
+        </div>
+        <div class="tab" data-target="menu">
+          <div id="tab-icon" class="fa-regular fa-bars"></div>
+          <p>Menu</p>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>
