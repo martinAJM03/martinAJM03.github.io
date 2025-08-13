@@ -127,7 +127,13 @@ async function createPopup(content = 'What?', type = 'alert') {
         setTimeout(() => {
           const inputEl = document.getElementById('popupInput');
           if (inputEl) {
-            inputEl.focus(); // Optional: auto-focus
+            // Ensure input is visible and rendered
+            requestAnimationFrame(() => {
+              inputEl.focus();
+              // iOS keyboard hint: simulate user tap
+              inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+            });
+
             inputEl.addEventListener('keydown', (event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
@@ -135,7 +141,7 @@ async function createPopup(content = 'What?', type = 'alert') {
               }
             });
           }
-        })
+        }, 50); // Slight delay to allow DOM paint
         break;
       }
       case 'confirm': {
