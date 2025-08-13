@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name='apple-mobile-web-app-capable' content='yes'>
+  <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
+  <title>Random</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.0.0/css/all.css">
+</head>
+<body>
+  <div class='view' id='home'>
+    <button class="option" onclick="view('counter')">Counter</button>
+    <button class="option" onclick="view('randomizer-list')">Randomizer</button>
+  </div>
 
+  <div class='view active' id='counter'>
+    <div class="view-title">
+      <button class="back" onclick="view('home'); editCounters('false');"><span class="fa-solid fa-chevron-left"></span> Back</button>
+      <p>Counter</p>
+      <div class="info-button" onclick="createPopup('<b>to do:</b><li>change colors on counters</li><li>swipe to delete/edit</li><li>edit existing counter details</li>')"><span class="fa-regular fa-info-circle"></span></div>
+    </div>
+    <div class="list-buttons">
+      <div id="add-counter" class="fa-solid fa-plus" onclick="addCounter()"></div>
+      <div id="edit-counters" onclick="editCounters()">Edit</div>
+    </div>
+    <div class="counter-container"></div>
+  </div>
+
+  <div class='view' id='randomizer-list'>
+    <div class="view-title">
+      <button class="back" onclick="view('home')"><span class="fa-solid fa-chevron-left"></span> Back</button>
+      <p>Randomizers</p>
+      <div class="info-button" onclick="createPopup('nothing so far')"><span class="fa-regular fa-info-circle"></span></div>
+    </div> 
+    <div class="option-list">
+      <button class="option" onclick="view('random-number')">Number Randomizer</button>
+      <button class="option" onclick="view('random-list')">List Randomizer</button>
+    </div>
+  </div>
+
+  <div class='view' id='random-number'>
+    <div class="view-title">
+      <button class="back" onclick="view('randomizer-list')"><span class="fa-solid fa-chevron-left"></span> Back</button>
+      <p>Number Randomizer</p>
+      <div class="info-button" onclick="createPopup('nothing so far')"><span class="fa-regular fa-info-circle"></span></div>
+    </div>  
+    <div class="random-number-generator">
+      <div class="random-number-output"></div>
+      <div class="limits">
+        <input id="random-min" type="number" placeholder="Min">
+        <input id="random-max" type="number" placeholder="Max">
+      </div>
+      <button onclick="generateNumber()">Generate Number</button>
+    </div>
+  </div>
+
+    <div class='view' id='random-list'>
+    <div class="view-title">
+      <button class="back" onclick="view('randomizer-list'); editCounters('false');"><span class="fa-solid fa-chevron-left"></span> Back</button>
+      <p>List Randomizer</p>
+      <div class="info-button" onclick="createPopup('nothing so far')"><span class="fa-regular fa-info-circle"></span></div>
+    </div>  
+    <div class="list-buttons">
+      <div id="add-item" class="fa-solid fa-plus" onclick="addListItem()"></div>
+      <div id="edit-list" onclick="editList()">Edit</div>
+    </div>
+    <div class="random-item"></div>
+    <button class="random-item-button" onclick="randomItem()">Get Random Item</button>
+    <div class="item-list"></div>
+  </div>
+
+  <!-- Popup -->
+  <div id="popupOverlay" class="popup-overlay">
+    <div id="popup" class="popup">
+      <div id="popupContent" class="popup-content"></div>
+      <div class="popup-input"></div>
+      <div id="popupButtons" class="popup-button-container"></div>
+    </div>
+  </div>
+
+</body>
+</html>
