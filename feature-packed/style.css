@@ -12,6 +12,7 @@ body, html {
   width: 100%;
   flex-direction: column;
   box-sizing: border-box;
+  padding-top: env(safe-area-inset-top)
 }
 .view.active {
   display: flex;
@@ -288,4 +289,5 @@ body, html {
 }
 .item-list {
   padding: 10px;
+
 }
