@@ -3,8 +3,17 @@ const views = document.querySelectorAll('.view');
 
 function view(target) {
   views.forEach(v => v.classList.remove('active'));
-  document.getElementById(target).classList.add('active')
+  document.getElementById(target).classList.add('active');
+  localStorage.setItem('lastView', target);
 }
+
+// Last View
+
+let lastView = localStorage.getItem('lastView');
+if (lastView == null) {
+  lastView = 'home'
+}
+view(lastView);
 
 // Counter
 let counterData = [];
