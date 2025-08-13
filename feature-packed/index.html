@@ -11,12 +11,12 @@
   <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.0.0/css/all.css">
 </head>
 <body>
-  <div class='view' id='home'>
+  <div class='view active' id='home'>
     <button class="option" onclick="view('counter')">Counter</button>
     <button class="option" onclick="view('randomizer-list')">Randomizer</button>
   </div>
 
-  <div class='view active' id='counter'>
+  <div class='view' id='counter'>
     <div class="view-title">
       <button class="back" onclick="view('home'); editCounters('false');"><span class="fa-solid fa-chevron-left"></span> Back</button>
       <p>Counter</p>
@@ -82,4 +82,5 @@
   </div>
 
 </body>
+
 </html>
