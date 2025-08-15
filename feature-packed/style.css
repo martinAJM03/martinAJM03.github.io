@@ -107,11 +107,15 @@ body, html {
   background-color: red;
   align-items: center;
   border-radius: 20px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
 }
 .counter-label {
+  margin-left: 10px;
   padding: 10px;
   font-size: 18px;
+  background-color: rgba(0,0,0,0.3);
   color: white;
+  border-radius: 10px;
 }
 .counter-value {
   font-size: 35px;
@@ -244,7 +248,12 @@ body, html {
     filter: blur(50px);
   }
 }
-
+#colorPicker {
+  display: none;
+}
+#colorPicker.active {
+  display: flex;
+}
 .option-list {
   display: flex;
   flex-direction: column;

@@ -30,7 +30,7 @@ function subtract(id) {
 async function addCounter() {
   await createPopup('Name:', 'prompt');
   if (localStorage.getItem('popupReturn') !== 'closed') {
-    counterData.push({label: localStorage.getItem('popupReturn'), value: 0})
+    counterData.push({label: localStorage.getItem('popupReturn'), value: 0, color: '#ff0000'})
     renderCounters();
   }
 }
@@ -43,9 +43,9 @@ function renderCounters() {
   for (i in counterData) {
     document.querySelector('.counter-container').innerHTML += 
       `
-      <div class="counter" data-counterId="${i}">
+      <div class="counter" data-counterid="${i}">
         <div class="remove-button" onclick="removeCounter(${i})"><span class="fa-solid fa-circle-minus"></span></div>
-        <div class="value-container">
+        <div class="value-container" style="background-color: ${counterData[i].color}">
           <div class="counter-label">${counterData[i].label}</div>
           <div class="counter-buttons">
             <div class="counter-value">${counterData[i].value}</div>
@@ -61,6 +61,9 @@ function renderCounters() {
       button.classList.add('active');
     })
   }
+  document.querySelectorAll('.value-container').forEach(counter => {
+    counter.addEventListener('click', () => {editCounterDetails(counter.closest('.counter').dataset.counterid)})
+  })
 }
 
 let editMode = false;
@@ -97,6 +100,24 @@ function editCounters(mode = 'toggle') {
   }
 }
 
+async function editCounterDetails(id) {
+  if (editMode) {
+    document.getElementById('popupInput').value = counterData[id].label;
+    document.getElementById('colorPicker').classList.add('active'); 
+    document.getElementById('colorPicker').value = counterData[id].color;
+    await createPopup('Edit counter','prompt');
+    const popupReturn = localStorage.getItem('popupReturn');
+    if (popupReturn !== 'closed') {
+      counterData[id].label = popupReturn;
+      counterData[id].color = document.getElementById('colorPicker').value;
+      renderCounters();
+    }
+
+    document.getElementById('colorPicker').classList.remove('active'); 
+    console.log(counterData[id].color)
+  }
+}
+
 renderCounters();
 
 // Popups
@@ -119,7 +140,6 @@ async function createPopup(content = 'What?', type = 'alert') {
       }
       case 'prompt': {
         document.querySelector('.popup-input').classList.add('active');
-        document.querySelector('.popup-input').innerHTML = `<input id="popupInput" type="text">`
         popupButtons.innerHTML = `<div class="popup-button" style="background-color:rgb(59, 130, 247)" onclick="closePopup('submit')">Submit</div>`;
         popupButtons.innerHTML += `<div class="popup-button" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Cancel</div>`;
         popupContent.classList.add('prompt');
@@ -200,6 +220,7 @@ function closePopup(type = 'close') {
   });
   document.querySelector('.popup-input').classList.remove('active');
   popupContent.classList.remove('prompt');
+  document.getElementById('popupInput').value = '';
 }
 
 // Random Number
