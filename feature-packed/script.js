@@ -44,12 +44,12 @@ function renderCounters() {
     document.querySelector('.counter-container').innerHTML += 
       `
       <div class="counter" data-counterid="${i}">
-        <div class="remove-button" onclick="removeCounter(${i})"><span class="fa-solid fa-circle-minus"></span></div>
+        <div class="remove-button" onclick="removeCounter(${i})"><i class="fa-solid fa-circle-minus"></i></div>
         <div class="value-container" style="background-color: ${counterData[i].color}">
           <div class="counter-label">${counterData[i].label}</div>
           <div class="counter-buttons">
             <div class="counter-value">${counterData[i].value}</div>
-            <button class="subtract" onclick="subtract(${i})"><span class="fa-solid fa-minus"></span></button>
+            <button class="subtract" onclick="subtract(${i})"><i class="fa-solid fa-minus"></i></button>
             <button class="add" onclick="add(${i})"><span class="fa-solid fa-plus"></span></button>
           </div>
         </div>
