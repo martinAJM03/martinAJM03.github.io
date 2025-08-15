@@ -132,8 +132,9 @@ body, html {
   align-items: center;
 }
 .counter-buttons button {
-  display: grid;
-  place-items: center;
+  display: flex;
+  position: relative;
+  padding: auto;
   font-size: 18px;
   width: 40px;
   height: 40px;

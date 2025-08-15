@@ -102,6 +102,9 @@ function editCounters(mode = 'toggle') {
 
 async function editCounterDetails(id) {
   if (editMode) {
+    setTimeout(() => {
+      document.getElementById('popupInput').focus();
+    }, 0);
     document.getElementById('popupInput').value = counterData[id].label;
     document.getElementById('colorPicker').classList.add('active'); 
     document.getElementById('colorPicker').value = counterData[id].color;
@@ -127,6 +130,14 @@ const popupContent = document.getElementById('popupContent');
 const popupButtons = document.getElementById('popupButtons');
 let popupResolve;
 
+const inputEl = document.getElementById('popupInput');
+inputEl.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    closePopup('submit');
+  }
+});
+
 async function createPopup(content = 'What?', type = 'alert') {
   content = (content === '') ? 'What?' : content;
   popup.classList.add('fade-in');
@@ -143,25 +154,6 @@ async function createPopup(content = 'What?', type = 'alert') {
         popupButtons.innerHTML = `<div class="popup-button" style="background-color:rgb(59, 130, 247)" onclick="closePopup('submit')">Submit</div>`;
         popupButtons.innerHTML += `<div class="popup-button" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Cancel</div>`;
         popupContent.classList.add('prompt');
-        
-        setTimeout(() => {
-          const inputEl = document.getElementById('popupInput');
-          if (inputEl) {
-            // Ensure input is visible and rendered
-            requestAnimationFrame(() => {
-              inputEl.focus();
-              // iOS keyboard hint: simulate user tap
-              inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
-            });
-
-            inputEl.addEventListener('keydown', (event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                closePopup('submit');
-              }
-            });
-          }
-        }, 50); // Slight delay to allow DOM paint
         break;
       }
       case 'confirm': {
