@@ -25,7 +25,7 @@
       <div class="info-button" onclick="createPopup('<b>to do:</b><li>change colors on counters</li><li>swipe to delete/edit</li><li>edit existing counter details</li>')"><span class="fa-regular fa-info-circle"></span></div>
     </div>
     <div class="list-buttons">
-      <div id="add-counter" class="fa-solid fa-plus" onclick="addCounter()"></div>
+      <div id="add-counter" class="fa-solid fa-plus" onclick="addCounter(); document.getElementById('popupInput').focus();"></div>
       <div id="edit-counters" onclick="editCounters()">Edit</div>
     </div>
     <div class="counter-container"></div>
