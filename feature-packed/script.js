@@ -50,7 +50,7 @@ function renderCounters() {
           <div class="counter-buttons">
             <div class="counter-value">${counterData[i].value}</div>
             <button class="subtract" onclick="subtract(${i})"><i class="fa-solid fa-minus"></i></button>
-            <button class="add" onclick="add(${i})"><span class="fa-solid fa-plus"></span></button>
+            <button class="add" onclick="add(${i})"><i class="fa-solid fa-plus"></i></button>
           </div>
         </div>
       </div>
