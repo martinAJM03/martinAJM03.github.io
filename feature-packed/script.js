@@ -17,6 +17,10 @@ view(lastView);
 
 // Counter
 let counterData = [];
+if (localStorage.getItem('counterData') != null) {
+  counterData = JSON.parse(localStorage.getItem('counterData')) || [];
+}
+localStorage.setItem('counterData', '');
 
 function add(id) {
   counterData[id].value++;
@@ -28,9 +32,11 @@ function subtract(id) {
 }
 
 async function addCounter() {
+  document.getElementById('colorPicker').classList.add('active'); 
+  document.getElementById('colorPicker').value = '#ff0000';
   await createPopup('Name:', 'prompt');
   if (localStorage.getItem('popupReturn') !== 'closed') {
-    counterData.push({label: localStorage.getItem('popupReturn'), value: 0, color: '#ff0000'})
+    counterData.push({label: localStorage.getItem('popupReturn'), value: 0, color: document.getElementById('colorPicker').value})
     renderCounters();
   }
 }
@@ -64,6 +70,7 @@ function renderCounters() {
   document.querySelectorAll('.value-container').forEach(counter => {
     counter.addEventListener('click', () => {editCounterDetails(counter.closest('.counter').dataset.counterid)})
   })
+  localStorage.setItem('counterData', JSON.stringify(counterData));
 }
 
 let editMode = false;
@@ -121,6 +128,15 @@ async function editCounterDetails(id) {
   }
 }
 
+async function resetCounters() {
+  await createPopup('Are you sure?', 'confirm', 'danger');
+  if (localStorage.getItem('popupReturn') !== 'closed') {
+    counterData = [];
+    renderCounters();
+    console.log('All counters cleared')
+  }
+}
+
 renderCounters();
 
 // Popups
@@ -138,31 +154,43 @@ inputEl.addEventListener('keydown', (event) => {
   }
 });
 
-async function createPopup(content = 'What?', type = 'alert') {
+async function createPopup(content = 'What?', type = 'alert', color = 'normal') {
   content = (content === '') ? 'What?' : content;
   popup.classList.add('fade-in');
 
   return new Promise(resolve => {
     popupResolve = resolve;
+    let buttonColor;
+    switch (color) {
+      case 'danger': {
+        buttonColor = 'red';
+        break;
+      }
+      case 'normal' :  
+      case 'default' : {
+        buttonColor = 'rgb(59, 130, 247)'
+        break;
+      }
+    }
     switch (type) {
       case 'alert': {
-        popupButtons.innerHTML = `<div class="popup-button" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Close</div>`
+        popupButtons.innerHTML = `<div class="popup-button" id="popupButton2" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Close</div>`
         break;
       }
       case 'prompt': {
         document.querySelector('.popup-input').classList.add('active');
-        popupButtons.innerHTML = `<div class="popup-button" style="background-color:rgb(59, 130, 247)" onclick="closePopup('submit')">Submit</div>`;
-        popupButtons.innerHTML += `<div class="popup-button" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Cancel</div>`;
+        popupButtons.innerHTML = `<div class="popup-button" id="popupButton1" style="background-color:${buttonColor}" onclick="closePopup('submit')">Submit</div>`;
+        popupButtons.innerHTML += `<div class="popup-button" id="popupButton2" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Cancel</div>`;
         popupContent.classList.add('prompt');
         break;
       }
       case 'confirm': {
-        popupButtons.innerHTML = `<div class="popup-button" style="background-color:rgb(59, 130, 247)" onclick="closePopup('confirm')">Okay</div>`;
-        popupButtons.innerHTML += `<div class="popup-button" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Cancel</div>`
+        popupButtons.innerHTML = `<div class="popup-button" id="popupButton1" style="background-color:${buttonColor}" onclick="closePopup('confirm')">Okay</div>`;
+        popupButtons.innerHTML += `<div class="popup-button" id="popupButton2" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Cancel</div>`
         break;
       }
       default : {
-        popupButtons.innerHTML = `<div class="popup-button" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Close</div>`
+        popupButtons.innerHTML = `<div class="popup-button" id="popupButton2" style="background-color:rgba(120, 120, 120, 0.5)" onclick="closePopup('close')">Close</div>`
         break;
       }
     }
@@ -215,11 +243,16 @@ function closePopup(type = 'close') {
   document.getElementById('popupInput').value = '';
 }
 
+function focusKeyboard() {
+  inputEl.focus();
+  inputEl.click();
+}
+
 // Random Number
 
 function generateNumber(min = Number(document.getElementById('random-min').value), max = Number(document.getElementById('random-max').value)) {
   for (i=0; i<20; i++) {
-  const rand = Math.floor(Math.random() * (max - min + 1)) + min
+  const rand = Math.floor(Math.random() * (max - min + 1)) + min;
   document.querySelector('.random-number-output').textContent = rand;
   }
 }

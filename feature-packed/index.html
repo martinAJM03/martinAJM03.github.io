@@ -12,9 +12,13 @@
 </head>
 <body>
   <div class='view' id='home'>
+    <div class="view-title">
+      <p>random stuff app thing</p>
+    </div>
     <div class="option-list">
       <button class="option" onclick="view('counter')">Counter</button>
       <button class="option" onclick="view('randomizer-list')">Randomizer</button>
+      <div class="settings-button" onclick="view('settings')">Settings</div>
     </div>
   </div>
 
@@ -25,7 +29,7 @@
       <div class="info-button" onclick="createPopup('<b>to do:</b><li>change colors on counters</li><li>swipe to delete/edit</li><li>edit existing counter details</li>')"><span class="fa-regular fa-info-circle"></span></div>
     </div>
     <div class="list-buttons">
-      <div id="add-counter" class="fa-solid fa-plus" onclick="addCounter(); document.getElementById('popupInput').focus();"></div>
+      <div id="add-counter" class="fa-solid fa-plus" onclick="addCounter(); focusKeyboard();"></div>
       <div id="edit-counters" onclick="editCounters()">Edit</div>
     </div>
     <div class="counter-container"></div>
@@ -66,7 +70,7 @@
       <div class="info-button" onclick="createPopup('nothing so far')"><span class="fa-regular fa-info-circle"></span></div>
     </div>  
     <div class="list-buttons">
-      <div id="add-item" class="fa-solid fa-plus" onclick="addListItem()"></div>
+      <div id="add-item" class="fa-solid fa-plus" onclick="addListItem(); focusKeyboard();"></div>
       <div id="edit-list" onclick="editList()">Edit</div>
     </div>
     <div class="random-item"></div>
@@ -74,6 +78,17 @@
     <div class="item-list"></div>
   </div>
 
+  <div class="view" id="settings">
+    <div class="view-title">
+      <button class="back" onclick="view('home')"><span class="fa-solid fa-chevron-left"></span> Back</button>
+      <p>Settings</p>
+      <div class="info-button" onclick="createPopup('nothing so far')"><span class="fa-regular fa-info-circle"></span></div>
+    </div>  
+    <div class="option-list">
+      <button class="option" style="color:red;" onclick="resetCounters()">Reset Counters</button>
+    </div>
+
+  </div>
   <!-- Popup -->
   <div id="popupOverlay" class="popup-overlay">
     <div id="popup" class="popup">
