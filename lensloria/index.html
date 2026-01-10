@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#000000">
+    <title>Lensloria - Stream Movies & TV</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-sans antialiased overflow-x-hidden pb-20 md:pb-0">
 
+    <nav class="fixed top-0 w-full z-40 bg-black/90 backdrop-blur-md border-b border-gray-800 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4 z-50">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-red-500 bg-clip-text text-transparent cursor-pointer" onclick="switchType('all')">LENSLORIA</h1>
+                <div class="hidden md:flex gap-6 ml-8">
+                    <button onclick="switchType('all')" id="desk-btn-all" class="nav-link active">Home</button>
+                    <button onclick="switchType('movie')" id="desk-btn-movie" class="nav-link">Movies</button>
+                    <button onclick="switchType('tv')" id="desk-btn-tv" class="nav-link">TV Series</button>
+                    <button onclick="switchType('settings')" id="desk-btn-settings" class="nav-link">Settings</button>
+                </div>
+            </div>
+            
+            <div class="hidden md:block relative w-full max-w-xs lg:max-w-md ml-4">
+                <input type="text" id="desk-search-input" placeholder="Search titles..." 
+                    class="w-full bg-gray-800/50 border border-gray-700 text-white px-4 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all">
+                <div id="desk-search-results" class="absolute top-12 left-0 w-full bg-black/95 border border-gray-800 rounded-xl shadow-2xl hidden max-h-80 overflow-y-auto z-50 custom-scrollbar"></div>
+            </div>
+
+            <button class="md:hidden p-2 text-gray-300" onclick="toggleMobileSearch()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+        </div>
+
+        <div id="mobile-search-bar" class="hidden md:hidden px-4 pb-4 border-b border-gray-800 bg-black">
+            <input type="text" id="mobile-search-input" placeholder="Search movies & TV..." 
+                class="w-full bg-gray-900 text-white px-4 py-3 rounded-xl text-base border border-gray-800 focus:outline-none focus:border-purple-500">
+            <div id="mobile-search-results" class="mt-2 bg-gray-900 rounded-xl hidden max-h-[60vh] overflow-y-auto border border-gray-800"></div>
+        </div>
+
+        <div class="w-full overflow-x-auto pb-3 pt-1 scrollbar-hide border-t border-gray-800/30 hidden" id="genre-container">
+            <div id="genre-list" class="flex px-4 gap-3 min-w-max items-center h-10"></div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="pt-32 px-3 md:px-6 max-w-7xl mx-auto min-h-screen transition-all duration-200">
+        <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-2xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+            <span id="toast-msg">Notification</span>
+        </div>
+
+        <div id="settings-view" class="hidden max-w-lg mx-auto py-10">
+            <h2 class="text-2xl font-bold mb-6 border-b border-gray-800 pb-2">Settings</h2>
+            
+            <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-white">Clear Watch History</h3>
+                        <p class="text-sm text-gray-400 mt-1">Remove all items from your "Continue Watching" list.</p>
+                    </div>
+                    <button onclick="clearHistory()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Clear
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center text-sm text-gray-500">
+                <p>Lensloria v1.0</p>
+            </div>
+        </div>
+
+        <div id="home-view" class="space-y-8 pb-4 block">
+            <div id="continue-watching-section" class="hidden animate-fade-in">
+                <h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Continue Watching
+                </h2>
+                <div id="continue-watching-list" class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x"></div>
+            </div>
+            
+            <div id="home-rows-container"></div>
+        </div>
+
+        <div id="category-view" class="space-y-8 pb-4 hidden">
+            </div>
+
+        <div id="grid-view" class="">
+            
+            <div id="contextual-row-section" class="hidden mb-8 animate-fade-in">
+                <h2 id="contextual-row-title" class="text-lg font-bold text-white mb-3 pl-3 border-l-4 border-yellow-500">Top Rated</h2>
+                <div id="contextual-row-list" class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px]"></div>
+            </div>
+
+            <h2 id="section-title" class="text-xl font-bold text-white mb-4 mt-6 border-b border-gray-800 pb-2">Trending Now</h2>
+            <div id="content-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
+                </div>
+            
+            <div id="sentinel" class="h-24 w-full flex justify-center items-center opacity-0 pointer-events-none">
+                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="video-modal" class="fixed inset-0 bottom-16 md:bottom-0 z-[100] bg-black hidden flex flex-col transition-opacity duration-300 overflow-y-auto">
+        <div class="flex-none p-4 flex justify-between items-center bg-gray-900/90 backdrop-blur border-b border-gray-800 sticky top-0 z-20">
+            <div class="flex flex-col overflow-hidden max-w-[80%]">
+                <h2 id="modal-title" class="text-base md:text-lg font-bold text-white truncate"></h2>
+                <span id="modal-subtitle" class="text-xs text-gray-400 truncate"></span>
+            </div>
+            <button onclick="closeModal()" class="p-2 bg-gray-800 rounded-full hover:bg-red-600 transition text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="flex-none w-full aspect-video bg-black relative">
+            <div id="iframe-loader" class="absolute inset-0 flex items-center justify-center z-0">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+            <iframe id="video-frame" class="w-full h-full border-0 z-10 relative" allowfullscreen allow="autoplay; fullscreen"></iframe>
+        </div>
+        
+        <div id="tv-controls" class="flex-none hidden bg-gray-900 border-b border-gray-800 p-3 flex gap-3 overflow-x-auto scrollbar-hide">
+            <div class="relative min-w-[120px]">
+                <select id="season-select" class="w-full appearance-none bg-gray-800 text-white text-sm py-2 px-3 pr-8 rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none"></select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+            </div>
+            <div class="relative min-w-[200px] flex-grow">
+                <select id="episode-select" class="w-full appearance-none bg-gray-800 text-white text-sm py-2 px-3 pr-8 rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none"></select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-6 bg-black flex-grow">
+            <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Overview</h3>
+            <p id="modal-description" class="text-gray-300 text-sm md:text-base leading-relaxed"></p>
+            
+            <div class="mt-4 flex flex-wrap gap-2" id="modal-tags"></div>
+        </div>
+    </div>
+
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-lg border-t border-gray-800 flex justify-around items-center h-16 z-[110] pb-safe">
+        <button onclick="closeModal(); switchType('all')" id="mob-btn-all" class="flex flex-col items-center justify-center w-full h-full text-purple-500 hover:text-white group active:scale-95 transition">
+            <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span class="text-[10px]">Home</span>
+        </button>
+        <button onclick="closeModal(); switchType('movie')" id="mob-btn-movie" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
+            <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+            <span class="text-[10px]">Movies</span>
+        </button>
+        <button onclick="closeModal(); switchType('tv')" id="mob-btn-tv" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
+            <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span class="text-[10px]">TV Series</span>
+        </button>
+        <button onclick="closeModal(); switchType('settings')" id="mob-btn-settings" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
+            <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="text-[10px]">Settings</span>
+        </button>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
