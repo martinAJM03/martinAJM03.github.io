@@ -71,30 +71,30 @@
         </div>
 
         <div id="home-view" class="space-y-8 pb-4 block">
-            <div id="continue-watching-section" class="hidden animate-fade-in">
+            <div id="continue-watching-section" class="hidden animate-fade-in group/row relative">
                 <h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Continue Watching
                 </h2>
-                <div id="continue-watching-list" class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x"></div>
+                <div id="continue-watching-list" class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x scroll-smooth"></div>
             </div>
             
             <div id="home-rows-container"></div>
         </div>
 
         <div id="category-view" class="space-y-8 pb-4 hidden">
-            </div>
+        </div>
 
         <div id="grid-view" class="">
             
-            <div id="contextual-row-section" class="hidden mb-8 animate-fade-in">
+            <div id="contextual-row-section" class="hidden mb-8 animate-fade-in group/row relative">
                 <h2 id="contextual-row-title" class="text-lg font-bold text-white mb-3 pl-3 border-l-4 border-yellow-500">Top Rated</h2>
-                <div id="contextual-row-list" class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px]"></div>
+                <div id="contextual-row-list" class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px] scroll-smooth"></div>
             </div>
 
             <h2 id="section-title" class="text-xl font-bold text-white mb-4 mt-6 border-b border-gray-800 pb-2">Trending Now</h2>
             <div id="content-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
-                </div>
+            </div>
             
             <div id="sentinel" class="h-24 w-full flex justify-center items-center opacity-0 pointer-events-none">
                 <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
@@ -119,18 +119,31 @@
             <iframe id="video-frame" class="w-full h-full border-0 z-10 relative" allowfullscreen allow="autoplay; fullscreen"></iframe>
         </div>
         
-        <div id="tv-controls" class="flex-none hidden bg-gray-900 border-b border-gray-800 p-3 flex gap-3 overflow-x-auto scrollbar-hide">
-            <div class="relative min-w-[120px]">
-                <select id="season-select" class="w-full appearance-none bg-gray-800 text-white text-sm py-2 px-3 pr-8 rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none"></select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+        <div id="tv-controls" class="hidden flex-col gap-3 p-4 bg-gray-900 border-b border-gray-800">
+            <div class="flex gap-3 w-full">
+                <div class="relative flex-1 min-w-[100px]">
+                    <select id="season-select" class="w-full appearance-none bg-gray-800 text-white text-sm py-2 px-3 pr-8 rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none h-10"></select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                        <svg class="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+                <div class="relative flex-1">
+                    <select id="episode-select" class="w-full appearance-none bg-gray-800 text-white text-sm py-2 px-3 pr-8 rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none h-10"></select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                        <svg class="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
                 </div>
             </div>
-            <div class="relative min-w-[200px] flex-grow">
-                <select id="episode-select" class="w-full appearance-none bg-gray-800 text-white text-sm py-2 px-3 pr-8 rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none"></select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                    <svg class="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                </div>
+
+            <div class="flex justify-between items-center gap-3 pt-1">
+                <button id="btn-prev-ep" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition flex items-center justify-center gap-2 h-full">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Previous
+                </button>
+                <button id="btn-next-ep" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 px-4 rounded-lg border border-purple-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:border-gray-700 text-sm font-semibold transition flex items-center justify-center gap-2 h-full">
+                    Next
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
             </div>
         </div>
 
@@ -143,19 +156,19 @@
     </div>
 
     <nav class="md:hidden fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-lg border-t border-gray-800 flex justify-around items-center h-16 z-[110] pb-safe">
-        <button onclick="closeModal(); switchType('all')" id="mob-btn-all" class="flex flex-col items-center justify-center w-full h-full text-purple-500 hover:text-white group active:scale-95 transition">
+        <button onclick="closeModal(); switchType('all')" id="mob-btn-all" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-purple-500 hover:text-white group active:scale-95 transition">
             <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             <span class="text-[10px]">Home</span>
         </button>
-        <button onclick="closeModal(); switchType('movie')" id="mob-btn-movie" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
+        <button onclick="closeModal(); switchType('movie')" id="mob-btn-movie" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
             <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
             <span class="text-[10px]">Movies</span>
         </button>
-        <button onclick="closeModal(); switchType('tv')" id="mob-btn-tv" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
+        <button onclick="closeModal(); switchType('tv')" id="mob-btn-tv" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
             <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             <span class="text-[10px]">TV Series</span>
         </button>
-        <button onclick="closeModal(); switchType('settings')" id="mob-btn-settings" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
+        <button onclick="closeModal(); switchType('settings')" id="mob-btn-settings" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white group active:scale-95 transition">
             <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             <span class="text-[10px]">Settings</span>
         </button>

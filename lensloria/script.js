@@ -54,6 +54,8 @@ const elements = {
     tvControls: document.getElementById('tv-controls'),
     seasonSelect: document.getElementById('season-select'),
     episodeSelect: document.getElementById('episode-select'),
+    btnPrevEp: document.getElementById('btn-prev-ep'),
+    btnNextEp: document.getElementById('btn-next-ep'),
     iframeLoader: document.getElementById('iframe-loader'),
     continueSection: document.getElementById('continue-watching-section'),
     continueList: document.getElementById('continue-watching-list'),
@@ -75,6 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
     safeEventListener('setting-datasaver', 'change', () => toggleSetting('dataSaver'));
     safeEventListener('setting-autoplay', 'change', () => toggleSetting('autoplay'));
     safeEventListener('btn-clear-history', 'click', clearHistory);
+    
+    // Episode Navigation Listeners
+    safeEventListener('btn-prev-ep', 'click', () => navigateEpisode(-1));
+    safeEventListener('btn-next-ep', 'click', () => navigateEpisode(1));
 
     // Initial Load
     switchType('all'); 
@@ -181,6 +187,9 @@ function updateContinueWatching() {
     section.classList.remove('hidden');
     list.innerHTML = '';
     items.forEach(item => list.appendChild(createMiniCard(item, item.type, true)));
+    
+    // Add Scroll Buttons
+    addScrollButtons(section, list);
 }
 
 // --- Home Rows Data ---
@@ -198,14 +207,39 @@ function loadHomeData() {
 
     rows.forEach(row => {
         const wrapper = document.createElement('div');
-        wrapper.className = "animate-fade-in";
+        wrapper.className = "animate-fade-in group/row relative";
+        const listDiv = document.createElement('div');
+        listDiv.className = "flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px] scroll-smooth";
+        
         wrapper.innerHTML = `
             <h2 class="text-lg font-bold text-white mb-3 pl-3 border-l-4 border-purple-600">${row.title}</h2>
-            <div class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px]"></div>
         `;
+        wrapper.appendChild(listDiv);
         container.appendChild(wrapper);
-        fetchRow(row.url, null, row.type, wrapper.querySelector('div'));
+        
+        fetchRow(row.url, null, row.type, listDiv);
+        addScrollButtons(wrapper, listDiv);
     });
+}
+
+// Helper: Add horizontal scroll buttons
+function addScrollButtons(wrapper, listElement) {
+    wrapper.querySelectorAll('.scroll-btn').forEach(b => b.remove());
+
+    const btnClass = "scroll-btn hidden md:flex absolute top-[55%] -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-sm transition-opacity opacity-0 group-hover/row:opacity-100 cursor-pointer border border-gray-600";
+    
+    const leftBtn = document.createElement('button');
+    leftBtn.className = `${btnClass} left-2`;
+    leftBtn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>`;
+    leftBtn.onclick = () => listElement.scrollBy({ left: -400, behavior: 'smooth' });
+
+    const rightBtn = document.createElement('button');
+    rightBtn.className = `${btnClass} right-2`;
+    rightBtn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+    rightBtn.onclick = () => listElement.scrollBy({ left: 400, behavior: 'smooth' });
+
+    wrapper.appendChild(leftBtn);
+    wrapper.appendChild(rightBtn);
 }
 
 // --- Contextual Row (Inside Movies/TV Tabs) ---
@@ -214,6 +248,8 @@ async function updateContextualRow(type, genreId, genreName) {
     const title = genreId ? `Top Rated ${genreName}` : `Top Rated ${type === 'movie' ? 'Movies' : 'TV Shows'}`;
     titleEl.textContent = title;
     
+    addScrollButtons(elements.contextualRowSection, elements.contextualRowList);
+
     let url;
     if (genreId) {
         url = `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_genres=${genreId}&sort_by=vote_average.desc&vote_count.gte=300&page=1`;
@@ -238,18 +274,18 @@ async function fetchRow(url, containerId, type, element = null) {
 
 function createMiniCard(item, type, isHistory = false) {
     const div = document.createElement('div');
-    // Compact: w-28 mobile, w-36 desktop
-    div.className = "flex-none w-28 md:w-36 relative group cursor-pointer snap-start";
+    // Using group/card to ensure this element's hover effects are isolated
+    div.className = "flex-none w-28 md:w-36 relative group/card cursor-pointer snap-start";
     const progressLabel = isHistory && item.season ? `S${item.season}:E${item.episode}` : (item.release_date || item.first_air_date || '').split('-')[0];
 
     div.innerHTML = `
         <div class="aspect-[2/3] rounded-lg overflow-hidden bg-gray-900 relative shadow-lg">
-            <img src="${getImageUrl(item.poster_path, 'small')}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy">
+            <img src="${getImageUrl(item.poster_path, 'small')}" class="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-110" loading="lazy">
             <div class="absolute top-1 right-1 bg-black/60 backdrop-blur rounded px-1.5 py-0.5 text-[10px] text-yellow-400 font-bold">★ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</div>
             ${isHistory ? `<div class="absolute bottom-0 left-0 w-full h-1 bg-gray-700"><div class="h-full bg-purple-500 w-full"></div></div>` : ''}
         </div>
         <div class="mt-2">
-            <h4 class="text-xs font-medium truncate text-gray-200 group-hover:text-purple-400 transition-colors">${item.title || item.name}</h4>
+            <h4 class="text-xs font-medium truncate text-gray-200 group-hover/card:text-purple-400 transition-colors">${item.title || item.name}</h4>
             <p class="text-[10px] text-gray-500">${progressLabel}</p>
         </div>
     `;
@@ -269,6 +305,8 @@ function switchType(type) {
     
     // UI Resets
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    
+    // Mobile Button Logic
     document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
         btn.classList.remove('text-purple-500', 'text-white');
         btn.classList.add('text-gray-400');
@@ -300,7 +338,7 @@ function switchType(type) {
         elements.settingsView.classList.remove('hidden');
     } else if (type === 'all') {
         elements.homeView.classList.remove('hidden');
-        elements.gridView.classList.remove('hidden'); // Show overall trending at bottom
+        elements.gridView.classList.remove('hidden'); 
         elements.contextualRowSection.classList.add('hidden');
         elements.sectionTitle.textContent = "Overall Trending";
         updateContinueWatching();
@@ -310,8 +348,8 @@ function switchType(type) {
     } else {
         elements.genreContainer.classList.remove('hidden');
         elements.homeView.classList.add('hidden');
-        elements.categoryView.classList.remove('hidden'); // Show generic top rated
-        elements.gridView.classList.remove('hidden'); // Show Vertical Grid
+        elements.categoryView.classList.remove('hidden'); 
+        elements.gridView.classList.remove('hidden'); 
         elements.contextualRowSection.classList.remove('hidden');
         elements.sectionTitle.textContent = type === 'movie' ? "Trending Movies" : "Trending Series";
         
@@ -423,7 +461,8 @@ function getGridSkeletons(count) {
 function renderCards(items) {
     items.forEach(item => {
         const card = document.createElement('div');
-        card.className = "group relative w-full overflow-hidden rounded-xl bg-gray-900 shadow-xl cursor-pointer transition-all duration-300 active:scale-95 hover:z-10";
+        // Use group/card for isolation
+        card.className = "group/card relative w-full overflow-hidden rounded-xl bg-gray-900 shadow-xl cursor-pointer transition-all duration-300 active:scale-95 hover:z-10";
         
         const title = item.title || item.name;
         const year = (item.release_date || item.first_air_date || '').split('-')[0];
@@ -432,7 +471,7 @@ function renderCards(items) {
         // Larger Image for Vertical Grid
         card.innerHTML = `
             <div class="relative w-full aspect-[2/3]">
-                <img src="${getImageUrl(item.poster_path, 'large')}" alt="${title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <img src="${getImageUrl(item.poster_path, 'large')}" alt="${title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110">
                 <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md px-1.5 py-0.5 flex items-center gap-1 border border-white/10">
                     <span class="text-yellow-400 text-[10px]">★</span>
                     <span class="text-white text-[10px] font-bold">${rating}</span>
@@ -461,7 +500,6 @@ function createBadge(text, colorClasses) {
     return span;
 }
 
-// Updated fetchDetails to use append_to_response for extra data
 async function fetchDetails(type, id) {
     try {
         const res = await fetch(`${BASE_URL}/${type}/${id}?api_key=${API_KEY}&language=en-US&append_to_response=release_dates,content_ratings`);
@@ -521,23 +559,28 @@ async function openPlayer(item) {
     const typeLabel = mediaType === 'tv' ? 'TV Series' : 'Movie';
     elements.modalTags.appendChild(createBadge(typeLabel, 'text-purple-400 border-purple-500/30 bg-purple-500/10'));
 
-    // Call updated details fetch
     fetchDetails(mediaType, item.id);
 
     elements.iframeLoader.classList.remove('hidden');
     
     if (mediaType === 'movie') {
         elements.tvControls.classList.add('hidden');
+        elements.tvControls.classList.remove('flex');
         elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
         elements.videoFrame.src = `${VIDLINK_URL}/movie/${item.id}?nextbutton=true`;
         saveToHistory(item); 
     } else {
         elements.tvControls.classList.remove('hidden');
+        elements.tvControls.classList.add('flex');
         await setupTvControls(item.id, item);
     }
 }
 
+// Current Item tracking for navigation
+let currentTvItem = null;
+
 async function setupTvControls(tvId, itemData) {
+    currentTvItem = itemData; // Store for nav buttons
     elements.seasonSelect.innerHTML = '';
     elements.episodeSelect.innerHTML = '';
     
@@ -584,13 +627,73 @@ async function updateEpisodeList(tvId, seasonNum, defaultEp = 1, itemData) {
             elements.episodeSelect.appendChild(opt);
         });
         
+        // Handle 'last' keyword for moving to previous season
+        let targetEp = defaultEp;
+        if(defaultEp === 'last' && data.episodes.length > 0) {
+            targetEp = data.episodes[data.episodes.length - 1].episode_number;
+        } else if (defaultEp === 'first' && data.episodes.length > 0) {
+             targetEp = data.episodes[0].episode_number;
+        }
+
+        // Auto select target
         if(data.episodes.length > 0) {
-            const exists = data.episodes.find(ep => ep.episode_number == defaultEp);
-            const targetEp = exists ? defaultEp : data.episodes[0].episode_number;
-            if(!exists) elements.episodeSelect.value = targetEp;
-            playEpisode(tvId, seasonNum, targetEp, itemData);
+            const exists = data.episodes.find(ep => ep.episode_number == targetEp);
+            const finalEp = exists ? targetEp : data.episodes[0].episode_number;
+            elements.episodeSelect.value = finalEp;
+            playEpisode(tvId, seasonNum, finalEp, itemData);
         }
     } catch(e) { console.error(e); }
+}
+
+function updateNavButtonsState() {
+    const sSel = elements.seasonSelect;
+    const eSel = elements.episodeSelect;
+    
+    // Safety check
+    if (!sSel.options.length || !eSel.options.length) return;
+
+    const isFirstSeason = sSel.selectedIndex === 0;
+    const isLastSeason = sSel.selectedIndex === sSel.options.length - 1;
+    const isFirstEp = eSel.selectedIndex === 0;
+    const isLastEp = eSel.selectedIndex === eSel.options.length - 1;
+
+    elements.btnPrevEp.disabled = isFirstSeason && isFirstEp;
+    elements.btnNextEp.disabled = isLastSeason && isLastEp;
+}
+
+function navigateEpisode(direction) {
+    const sSel = elements.seasonSelect;
+    const eSel = elements.episodeSelect;
+    
+    if(!currentTvItem) return;
+
+    const currentEpIndex = eSel.selectedIndex;
+    const currentSeasonIndex = sSel.selectedIndex;
+
+    // NEXT Logic
+    if (direction === 1) {
+        if (currentEpIndex < eSel.options.length - 1) {
+            // Next Episode in current season
+            eSel.selectedIndex++;
+            playEpisode(currentTvItem.id, sSel.value, eSel.value, currentTvItem);
+        } else if (currentSeasonIndex < sSel.options.length - 1) {
+            // Next Season, First Episode
+            sSel.selectedIndex++;
+            updateEpisodeList(currentTvItem.id, sSel.value, 'first', currentTvItem);
+        }
+    } 
+    // PREV Logic
+    else {
+        if (currentEpIndex > 0) {
+            // Prev Episode in current season
+            eSel.selectedIndex--;
+            playEpisode(currentTvItem.id, sSel.value, eSel.value, currentTvItem);
+        } else if (currentSeasonIndex > 0) {
+            // Prev Season, Last Episode
+            sSel.selectedIndex--;
+            updateEpisodeList(currentTvItem.id, sSel.value, 'last', currentTvItem);
+        }
+    }
 }
 
 function playEpisode(tvId, season, episode, itemData) {
@@ -599,6 +702,9 @@ function playEpisode(tvId, season, episode, itemData) {
     elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
     document.title = `${currentState.currentShowTitle} - S${season}:E${episode}`;
     saveToHistory(itemData, season, episode);
+    
+    elements.episodeSelect.value = episode;
+    updateNavButtonsState();
 }
 
 function closeModal() {
