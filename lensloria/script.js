@@ -609,14 +609,14 @@ function playContent(item, season = null, episode = null) {
     const isTv = item.media_type === 'tv';
     document.title = isTv ? `${item.name} S${season}:E${episode}` : (item.title || "Movie");
     
-    // Cache buster for iOS
+    // Cache buster for iOS & playsinline to prevent native forced full screen
     const ts = Date.now();
     let src = '';
     if (isTv) {
-        src = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true&_t=${ts}`;
+        src = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true&playsinline=1&_t=${ts}`;
         saveToHistory(item, season, episode);
     } else {
-        src = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true&_t=${ts}`;
+        src = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true&playsinline=1&_t=${ts}`;
         saveToHistory(item);
     }
 
@@ -627,10 +627,10 @@ function playContent(item, season = null, episode = null) {
     const iframe = document.createElement('iframe');
     iframe.id = 'dynamic-video-frame';
     iframe.className = 'w-full h-full border-0 z-10 relative';
-    // Sandbox attributes are critical for some iOS environments to prevent loops
+    // Strict sandbox to prevent browser-hijack style full screen forcing
     iframe.sandbox = "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation";
-    iframe.allow = "autoplay; fullscreen; encrypted-media; picture-in-picture";
-    iframe.allowFullscreen = true;
+    // Allow attribute must include autoplay and fullscreen for inner logic
+    iframe.allow = "autoplay *; fullscreen *; encrypted-media *; picture-in-picture *";
     iframe.referrerPolicy = "origin"; 
     iframe.src = src;
     
