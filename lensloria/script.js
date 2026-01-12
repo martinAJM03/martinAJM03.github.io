@@ -22,8 +22,10 @@ let currentState = {
 
 let currentDetailsItem = null; 
 let currentPlayingItem = null;
-let currentSelectedSeason = 1; // Track custom dropdown selection
+let currentSelectedSeason = 1; 
+let currentSeasonsData = []; 
 let userSettings = { dataSaver: false, autoplay: true };
+let loaderTimeout = null;
 
 // --- DOM Elements ---
 const elements = {
@@ -70,17 +72,18 @@ const elements = {
     detailsWatchlistBtn: document.getElementById('details-watchlist-btn'),
     detailsPlayText: document.getElementById('play-btn-text'),
     
-    // Custom Dropdown Elements
-    seasonDropdownBtn: document.getElementById('season-dropdown-btn'),
-    seasonDropdownText: document.getElementById('season-dropdown-text'),
-    seasonDropdownList: document.getElementById('season-dropdown-list'),
+    // Season Selector
+    seasonSelectorBtn: document.getElementById('season-selector-btn'),
+    seasonSelectorText: document.getElementById('season-selector-text'),
+    seasonModal: document.getElementById('season-modal'),
+    seasonListContainer: document.getElementById('season-list-container'),
     
     episodesList: document.getElementById('episodes-list'),
     headerSeasonContainer: document.getElementById('season-sticky-bar'),
 
     // Player Modal Elements
     videoModal: document.getElementById('video-modal'),
-    videoFrame: document.getElementById('video-frame'),
+    videoContainer: document.getElementById('video-container'),
     iframeLoader: document.getElementById('iframe-loader'),
     
     continueSection: document.getElementById('continue-watching-section'),
@@ -118,18 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle dropdown
-    safeEventListener('season-dropdown-btn', 'click', (e) => {
-        e.stopPropagation();
-        elements.seasonDropdownList.classList.toggle('hidden');
-    });
-
-    // Close dropdown on click outside
-    document.addEventListener('click', (e) => {
-        if (!elements.seasonDropdownBtn.contains(e.target) && !elements.seasonDropdownList.contains(e.target)) {
-            elements.seasonDropdownList.classList.add('hidden');
-        }
-    });
+    // Season Selector Listener
+    safeEventListener('season-selector-btn', 'click', openSeasonModal);
 
     safeEventListener('details-play-btn', 'click', () => {
         if (!currentDetailsItem) return;
@@ -597,7 +590,7 @@ function closeDetailsModal(fullClose = false) {
     }, 300); 
 }
 
-// --- Player Logic ---
+// --- Player Logic (Fixed for iOS) ---
 function playContent(item, season = null, episode = null) {
     currentPlayingItem = item;
     
@@ -609,20 +602,47 @@ function playContent(item, season = null, episode = null) {
     setTimeout(() => { elements.videoModal.setAttribute('aria-hidden', 'false'); }, 10);
     elements.iframeLoader.classList.remove('hidden');
     
+    // Safety Timeout: hide loader after 3s anyway so user isn't stuck staring at purple spinner
+    clearTimeout(loaderTimeout);
+    loaderTimeout = setTimeout(() => elements.iframeLoader.classList.add('hidden'), 3000);
+
     const isTv = item.media_type === 'tv';
     document.title = isTv ? `${item.name} S${season}:E${episode}` : (item.title || "Movie");
-
+    
+    // Cache buster for iOS
+    const ts = Date.now();
+    let src = '';
     if (isTv) {
-        elements.videoFrame.src = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true`;
+        src = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true&_t=${ts}`;
         saveToHistory(item, season, episode);
     } else {
-        elements.videoFrame.src = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true`;
+        src = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true&_t=${ts}`;
         saveToHistory(item);
     }
-    elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
+
+    // iOS FIX: Create Iframe dynamically to ensure fresh load context and prevent loop
+    const existingFrame = document.getElementById('dynamic-video-frame');
+    if (existingFrame) existingFrame.remove();
+
+    const iframe = document.createElement('iframe');
+    iframe.id = 'dynamic-video-frame';
+    iframe.className = 'w-full h-full border-0 z-10 relative';
+    // Sandbox attributes are critical for some iOS environments to prevent loops
+    iframe.sandbox = "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation";
+    iframe.allow = "autoplay; fullscreen; encrypted-media; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = "origin"; 
+    iframe.src = src;
+    
+    iframe.onload = () => {
+        clearTimeout(loaderTimeout);
+        elements.iframeLoader.classList.add('hidden');
+    };
+    elements.videoContainer.appendChild(iframe);
 }
 
 function closeVideoModal() {
+    clearTimeout(loaderTimeout);
     elements.videoModal.setAttribute('aria-hidden', 'true');
     document.title = APP_TITLE;
 
@@ -631,7 +651,11 @@ function closeVideoModal() {
     
     setTimeout(() => {
         elements.videoModal.classList.add('hidden');
-        elements.videoFrame.src = '';
+        
+        // iOS FIX: Remove iframe completely
+        const existingFrame = document.getElementById('dynamic-video-frame');
+        if (existingFrame) existingFrame.remove();
+
         currentPlayingItem = null;
         
         if (currentDetailsItem) {
@@ -643,22 +667,19 @@ function closeVideoModal() {
     }, 300);
 }
 
-// --- TV Details & Custom Dropdown ---
+// --- TV Details & Season Modal ---
 async function setupTvDetails(tvId, itemData) {
-    // Clear list
     elements.episodesList.innerHTML = '<div class="p-4 text-center text-zinc-500 text-xs">Loading episodes...</div>';
-    elements.seasonDropdownList.innerHTML = '';
+    currentSeasonsData = [];
     
     try {
         const response = await fetch(`${BASE_URL}/tv/${tvId}?api_key=${API_KEY}&language=en-US`);
         const data = await response.json();
         
         const history = getHistory()[tvId];
-        // Determine initial season
         let seasonToLoad = 1;
         if (history && history.season) seasonToLoad = history.season;
         else if (data.seasons && data.seasons.length > 0) {
-            // Default to first available > 0, else just 1
             const first = data.seasons.find(s => s.season_number > 0);
             if(first) seasonToLoad = first.season_number;
         }
@@ -672,41 +693,48 @@ async function setupTvDetails(tvId, itemData) {
         currentSelectedSeason = seasonToLoad;
 
         if (data.seasons) {
-            // Sort: Season 1 at top. Filter out S0 if desired, or place at end.
-            // Requirement: "season one always appears at the top"
-            // Filter > 0 then sort 1..N
-            const sortedSeasons = data.seasons
+            currentSeasonsData = data.seasons
                 .filter(s => s.season_number > 0)
                 .sort((a,b) => a.season_number - b.season_number);
-
-            sortedSeasons.forEach(season => {
-                const div = document.createElement('div');
-                div.className = `season-dropdown-item ${season.season_number === currentSelectedSeason ? 'selected' : ''}`;
-                div.textContent = `SEASON ${season.season_number} (${season.episode_count || 0} Episodes)`;
-                
-                div.onclick = () => {
-                    // Update selection
-                    currentSelectedSeason = season.season_number;
-                    elements.seasonDropdownText.textContent = `SEASON ${season.season_number}`;
-                    elements.seasonDropdownList.classList.add('hidden');
-                    
-                    // Update visual selection in list
-                    Array.from(elements.seasonDropdownList.children).forEach(c => c.classList.remove('selected'));
-                    div.classList.add('selected');
-                    
-                    updateEpisodeListInDetails(tvId, season.season_number);
-                };
-                
-                elements.seasonDropdownList.appendChild(div);
-            });
             
-            // Set initial button text
-            elements.seasonDropdownText.textContent = `SEASON ${currentSelectedSeason}`;
-            
-            // Load initial episodes
+            elements.seasonSelectorText.textContent = `SEASON ${currentSelectedSeason}`;
             await updateEpisodeListInDetails(tvId, currentSelectedSeason);
         }
     } catch (e) { showToast("Failed to load TV details"); }
+}
+
+function openSeasonModal() {
+    if(!currentSeasonsData.length) return;
+    elements.seasonListContainer.innerHTML = '';
+    
+    currentSeasonsData.forEach(season => {
+        const div = document.createElement('div');
+        div.className = `p-4 rounded-xl cursor-pointer transition flex items-center justify-between group ${season.season_number === currentSelectedSeason ? 'bg-zinc-800 border border-purple-500/30' : 'bg-zinc-900/50 hover:bg-zinc-800'}`;
+        
+        div.innerHTML = `
+            <div class="flex flex-col">
+                <span class="font-bold text-white text-base group-hover:text-purple-400 transition">Season ${season.season_number}</span>
+                <span class="text-xs text-zinc-500 mt-0.5">${season.episode_count || 0} Episodes</span>
+            </div>
+            ${season.season_number === currentSelectedSeason ? '<svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+        `;
+        
+        div.onclick = () => {
+            currentSelectedSeason = season.season_number;
+            elements.seasonSelectorText.textContent = `SEASON ${season.season_number}`;
+            closeSeasonModal();
+            updateEpisodeListInDetails(currentDetailsItem.id, season.season_number);
+        };
+        elements.seasonListContainer.appendChild(div);
+    });
+
+    elements.seasonModal.classList.remove('hidden');
+    setTimeout(() => elements.seasonModal.setAttribute('aria-hidden', 'false'), 10);
+}
+
+function closeSeasonModal() {
+    elements.seasonModal.setAttribute('aria-hidden', 'true');
+    setTimeout(() => elements.seasonModal.classList.add('hidden'), 300);
 }
 
 async function updateEpisodeListInDetails(tvId, seasonNum) {

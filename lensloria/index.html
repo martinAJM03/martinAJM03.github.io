@@ -88,7 +88,7 @@
                 <div class="flex items-center justify-between border-t border-zinc-800 pt-4">
                      <div>
                         <h3 class="font-medium text-white">Version</h3>
-                        <p class="text-sm text-zinc-400 mt-1">Lensloria v2.3</p>
+                        <p class="text-sm text-zinc-400 mt-1">Lensloria v2.5</p>
                     </div>
                 </div>
             </div>
@@ -142,7 +142,7 @@
             <span id="sticky-title" class="font-bold text-white text-base md:text-lg opacity-0 transition-opacity duration-300 pointer-events-none truncate max-w-[60%]"></span>
         </div>
 
-        <div id="details-modal-content" class="relative w-full h-full bg-black flex flex-col overflow-y-auto custom-scrollbar">
+        <div id="details-modal-content" class="modal-content-slide-up relative w-full h-full bg-black flex flex-col overflow-y-auto custom-scrollbar">
             
             <div class="relative w-full aspect-video md:aspect-[2.5/1] shrink-0">
                 <img id="details-backdrop" class="w-full h-full object-cover" src="" alt="">
@@ -175,15 +175,10 @@
                     
                     <div id="season-sticky-bar" class="sticky top-16 z-20 bg-black/90 backdrop-blur-md border-b border-zinc-800 px-4 md:px-8 py-3 flex items-center shadow-lg">
                         
-                        <div class="relative" id="custom-season-dropdown">
-                            <button id="season-dropdown-btn" class="flex items-center gap-2 font-bold text-white text-sm uppercase tracking-wide hover:text-purple-400 transition-colors">
-                                <span id="season-dropdown-text">Season 1</span>
-                                <svg class="w-4 h-4 text-zinc-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </button>
-                            
-                            <div id="season-dropdown-list" class="absolute top-full left-0 mt-3 w-64 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl z-50 hidden max-h-60 overflow-y-auto custom-scrollbar">
-                                </div>
-                        </div>
+                        <button id="season-selector-btn" class="flex items-center gap-2 font-bold text-white text-sm uppercase tracking-wide hover:text-purple-400 transition-colors">
+                            <span id="season-selector-text">Season 1</span>
+                            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
 
                     </div>
                     
@@ -193,17 +188,27 @@
         </div>
     </div>
 
+    <div id="season-modal" class="modal-overlay fixed inset-0 z-[135] bg-black hidden flex flex-col" aria-hidden="true">
+        <div class="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900">
+            <h3 class="text-lg font-bold text-white">Select Season</h3>
+            <button onclick="closeSeasonModal()" class="p-2 bg-zinc-800 rounded-full text-zinc-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div id="season-list-container" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+            </div>
+    </div>
+
     <div id="video-modal" class="modal-overlay fixed inset-0 z-[150] bg-black hidden flex items-center justify-center" aria-hidden="true">
         <button onclick="closeVideoModal()" class="absolute top-6 right-6 z-50 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition backdrop-blur-sm border border-white/10 group">
             <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
         
-        <div class="w-full h-full bg-black relative">
+        <div id="video-container" class="w-full h-full bg-black relative">
             <div id="iframe-loader" class="absolute inset-0 flex items-center justify-center z-0">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
             </div>
-            <iframe id="video-frame" class="w-full h-full border-0 z-10 relative" allowfullscreen allow="autoplay; fullscreen"></iframe>
-        </div>
+            </div>
     </div>
 
     <nav id="mobile-navbar" class="md:hidden fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-lg border-t border-zinc-800 flex justify-around items-center h-16 z-[130] pb-safe transition-transform duration-300">
