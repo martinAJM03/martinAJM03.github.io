@@ -25,7 +25,6 @@ let currentPlayingItem = null;
 let currentSelectedSeason = 1; 
 let currentSeasonsData = []; 
 let userSettings = { dataSaver: false, autoplay: true };
-let loaderTimeout = null;
 
 // --- DOM Elements ---
 const elements = {
@@ -83,7 +82,7 @@ const elements = {
 
     // Player Modal Elements
     videoModal: document.getElementById('video-modal'),
-    videoContainer: document.getElementById('video-container'),
+    videoFrame: document.getElementById('video-frame'),
     iframeLoader: document.getElementById('iframe-loader'),
     
     continueSection: document.getElementById('continue-watching-section'),
@@ -590,7 +589,7 @@ function closeDetailsModal(fullClose = false) {
     }, 300); 
 }
 
-// --- Player Logic (Fixed for iOS) ---
+// --- Player Logic ---
 function playContent(item, season = null, episode = null) {
     currentPlayingItem = item;
     
@@ -602,47 +601,23 @@ function playContent(item, season = null, episode = null) {
     setTimeout(() => { elements.videoModal.setAttribute('aria-hidden', 'false'); }, 10);
     elements.iframeLoader.classList.remove('hidden');
     
-    // Safety Timeout: hide loader after 3s anyway so user isn't stuck staring at purple spinner
-    clearTimeout(loaderTimeout);
-    loaderTimeout = setTimeout(() => elements.iframeLoader.classList.add('hidden'), 3000);
-
     const isTv = item.media_type === 'tv';
     document.title = isTv ? `${item.name} S${season}:E${episode}` : (item.title || "Movie");
-    
-    // Cache buster for iOS & playsinline to prevent native forced full screen
-    const ts = Date.now();
-    let src = '';
+
+    let url = '';
     if (isTv) {
-        src = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true&playsinline=1&_t=${ts}`;
+        url = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true`;
         saveToHistory(item, season, episode);
     } else {
-        src = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true&playsinline=1&_t=${ts}`;
+        url = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true`;
         saveToHistory(item);
     }
-
-    // iOS FIX: Create Iframe dynamically to ensure fresh load context and prevent loop
-    const existingFrame = document.getElementById('dynamic-video-frame');
-    if (existingFrame) existingFrame.remove();
-
-    const iframe = document.createElement('iframe');
-    iframe.id = 'dynamic-video-frame';
-    iframe.className = 'w-full h-full border-0 z-10 relative';
-    // Strict sandbox to prevent browser-hijack style full screen forcing
-    iframe.sandbox = "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation";
-    // Allow attribute must include autoplay and fullscreen for inner logic
-    iframe.allow = "autoplay *; fullscreen *; encrypted-media *; picture-in-picture *";
-    iframe.referrerPolicy = "origin"; 
-    iframe.src = src;
     
-    iframe.onload = () => {
-        clearTimeout(loaderTimeout);
-        elements.iframeLoader.classList.add('hidden');
-    };
-    elements.videoContainer.appendChild(iframe);
+    elements.videoFrame.src = url;
+    elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
 }
 
 function closeVideoModal() {
-    clearTimeout(loaderTimeout);
     elements.videoModal.setAttribute('aria-hidden', 'true');
     document.title = APP_TITLE;
 
@@ -651,11 +626,7 @@ function closeVideoModal() {
     
     setTimeout(() => {
         elements.videoModal.classList.add('hidden');
-        
-        // iOS FIX: Remove iframe completely
-        const existingFrame = document.getElementById('dynamic-video-frame');
-        if (existingFrame) existingFrame.remove();
-
+        elements.videoFrame.src = '';
         currentPlayingItem = null;
         
         if (currentDetailsItem) {
