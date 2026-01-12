@@ -3,30 +3,39 @@ html {
     -webkit-tap-highlight-color: transparent;
 }
 
+body.no-scroll {
+    overflow: hidden;
+}
+
 /* Scrollbar Utils */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #09090b; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #52525b; border-radius: 10px; }
 
-/* Skeleton */
+/* Skeleton Loading Animation */
 @keyframes shimmer {
     0% { background-position: -1000px 0; }
     100% { background-position: 1000px 0; }
 }
 .skeleton {
     animation: shimmer 2s infinite linear;
-    background: linear-gradient(to right, #1f2937 4%, #374151 25%, #1f2937 36%);
+    background: linear-gradient(to right, #18181b 4%, #27272a 25%, #18181b 36%);
     background-size: 1000px 100%;
 }
 
 .nav-link {
-    color: #9ca3af;
+    color: #a1a1aa;
     font-weight: 500;
     transition: color 0.2s;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+@media (min-width: 1024px) {
+    .nav-link { font-size: 0.95rem; }
 }
 .nav-link:hover { color: #fff; }
 .nav-link.active { color: #fff; position: relative; }
@@ -42,8 +51,43 @@ html {
 }
 
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-#video-modal[aria-hidden="true"] { opacity: 0; pointer-events: none; }
-#video-modal[aria-hidden="false"] { opacity: 1; pointer-events: auto; }
+
+/* Modals */
+.modal-overlay { 
+    opacity: 0; 
+    pointer-events: none; 
+    transition: opacity 0.3s ease;
+}
+.modal-overlay[aria-hidden="false"] { 
+    opacity: 1; 
+    pointer-events: auto; 
+}
+
+/* Modal Content Animations */
+.modal-content-slide-up {
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay[aria-hidden="false"] .modal-content-slide-up {
+    transform: translateY(0);
+}
+
+/* Episode List Item Styling */
+.episode-card {
+    transition: background-color 0.2s;
+}
+.episode-card:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.episode-card.active {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-left-color: #9333ea;
+}
+.episode-card:hover .play-overlay {
+    background-color: rgba(0,0,0,0.4);
+    transform: scale(1.1);
+}
+
 .snap-x { scroll-snap-type: x mandatory; }
 .snap-start { scroll-snap-align: start; }
 
@@ -52,3 +96,17 @@ html {
     to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+/* More Menu Transition */
+#more-menu {
+    transform: scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: bottom right;
+}
+#more-menu.open {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
