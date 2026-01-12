@@ -30,7 +30,7 @@ body.no-scroll {
     color: #a1a1aa;
     font-weight: 500;
     transition: color 0.2s;
-    font-size: 0.85rem;
+    font-size: 0.85rem; /* Slightly smaller to fit more items */
     cursor: pointer;
     white-space: nowrap;
 }
@@ -63,12 +63,12 @@ body.no-scroll {
     pointer-events: auto; 
 }
 
-/* Modal Content Animations */
-.modal-content-slide-up {
+/* Details Modal Content Animation */
+#details-modal-content {
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.modal-overlay[aria-hidden="false"] .modal-content-slide-up {
+.modal-overlay[aria-hidden="false"] #details-modal-content {
     transform: translateY(0);
 }
 
@@ -86,6 +86,26 @@ body.no-scroll {
 .episode-card:hover .play-overlay {
     background-color: rgba(0,0,0,0.4);
     transform: scale(1.1);
+}
+
+/* Custom Dropdown Styling */
+.season-dropdown-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.875rem;
+    color: #d4d4d8; /* zinc-300 */
+    border-left: 2px solid transparent;
+}
+.season-dropdown-item:hover {
+    background: #27272a; /* zinc-800 */
+    color: white;
+}
+.season-dropdown-item.selected {
+    background: #27272a;
+    color: #a855f7; /* purple-500 */
+    border-left-color: #a855f7;
+    font-weight: 600;
 }
 
 .snap-x { scroll-snap-type: x mandatory; }
