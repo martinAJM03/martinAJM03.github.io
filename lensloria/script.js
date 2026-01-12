@@ -25,6 +25,7 @@ let currentPlayingItem = null;
 let currentSelectedSeason = 1; 
 let currentSeasonsData = []; 
 let userSettings = { dataSaver: false, autoplay: true };
+let loaderTimeout = null;
 
 // --- DOM Elements ---
 const elements = {
@@ -82,7 +83,7 @@ const elements = {
 
     // Player Modal Elements
     videoModal: document.getElementById('video-modal'),
-    videoFrame: document.getElementById('video-frame'),
+    videoFrame: document.getElementById('video-frame'), 
     iframeLoader: document.getElementById('iframe-loader'),
     
     continueSection: document.getElementById('continue-watching-section'),
@@ -601,26 +602,35 @@ function playContent(item, season = null, episode = null) {
     setTimeout(() => { elements.videoModal.setAttribute('aria-hidden', 'false'); }, 10);
     elements.iframeLoader.classList.remove('hidden');
     
+    // Safety Timeout: hide loader after 3s anyway so user isn't stuck staring at purple spinner
+    clearTimeout(loaderTimeout);
+    loaderTimeout = setTimeout(() => elements.iframeLoader.classList.add('hidden'), 3000);
+
     const isTv = item.media_type === 'tv';
-    // FIX: Fallback to "Show" or a generic title to ensure we don't see "undefined" in tab
+    // FIX: Properly handle TV show titles (item.name) so "undefined" doesn't appear
     const displayTitle = item.name || item.title || "Show";
     document.title = isTv ? `${displayTitle} S${season}:E${episode}` : (displayTitle || "Movie");
-
-    let url = '';
-    // FIX: Added playsinline=1 for inline iOS player, mute=1 for autoplay support
+    
+    let src = '';
+    // FIX: Added &playsinline=1 to Vidking URL
+    // FIX: Added &mute=1 so iOS allows autoplay to start
     if (isTv) {
-        url = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoplay=1&mute=1&playsinline=1`;
+        src = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true&color=a855f7&nextEpisode=true&episodeSelector=true&playsinline=1&mute=1`;
         saveToHistory(item, season, episode);
     } else {
-        url = `${VIDKING_URL}/embed/movie/${item.id}?autoplay=1&mute=1&playsinline=1`;
+        src = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true&color=a855f7&playsinline=1&mute=1`;
         saveToHistory(item);
     }
-    
-    elements.videoFrame.src = url;
-    elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
+
+    elements.videoFrame.src = src;
+    elements.videoFrame.onload = () => {
+        clearTimeout(loaderTimeout);
+        elements.iframeLoader.classList.add('hidden');
+    };
 }
 
 function closeVideoModal() {
+    clearTimeout(loaderTimeout);
     elements.videoModal.setAttribute('aria-hidden', 'true');
     document.title = APP_TITLE;
 
