@@ -602,14 +602,17 @@ function playContent(item, season = null, episode = null) {
     elements.iframeLoader.classList.remove('hidden');
     
     const isTv = item.media_type === 'tv';
-    document.title = isTv ? `${item.name} S${season}:E${episode}` : (item.title || "Movie");
+    // FIX: Fallback to "Show" or a generic title to ensure we don't see "undefined" in tab
+    const displayTitle = item.name || item.title || "Show";
+    document.title = isTv ? `${displayTitle} S${season}:E${episode}` : (displayTitle || "Movie");
 
     let url = '';
+    // FIX: Added playsinline=1 for inline iOS player, mute=1 for autoplay support
     if (isTv) {
-        url = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoPlay=true`;
+        url = `${VIDKING_URL}/embed/tv/${item.id}/${season}/${episode}?autoplay=1&mute=1&playsinline=1`;
         saveToHistory(item, season, episode);
     } else {
-        url = `${VIDKING_URL}/embed/movie/${item.id}?autoPlay=true`;
+        url = `${VIDKING_URL}/embed/movie/${item.id}?autoplay=1&mute=1&playsinline=1`;
         saveToHistory(item);
     }
     
