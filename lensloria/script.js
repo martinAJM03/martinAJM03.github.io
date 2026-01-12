@@ -3,7 +3,7 @@ const API_KEY = "e88fbaeaee5254c8c9b67b1d5836af0b";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMG_URL_SMALL = "https://image.tmdb.org/t/p/w300"; 
 const IMG_URL_LARGE = "https://image.tmdb.org/t/p/w500"; 
-const VIDLINK_URL = "https://vidlink.pro";
+const VIDLINK_URL = "https://vidking.net";
 const APP_TITLE = "Lensloria - Stream Movies & TV";
 const HISTORY_KEY = "lensloria_watch_history";
 const SETTINGS_KEY = "lensloria_settings";
@@ -567,7 +567,7 @@ async function openPlayer(item) {
         elements.tvControls.classList.add('hidden');
         elements.tvControls.classList.remove('flex');
         elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
-        elements.videoFrame.src = `${VIDLINK_URL}/movie/${item.id}?nextbutton=true`;
+        elements.videoFrame.src = `${VIDLINK_URL}/embed/movie/${item.id}?autoPlay=true`;
         saveToHistory(item); 
     } else {
         elements.tvControls.classList.remove('hidden');
@@ -698,7 +698,7 @@ function navigateEpisode(direction) {
 
 function playEpisode(tvId, season, episode, itemData) {
     elements.iframeLoader.classList.remove('hidden');
-    elements.videoFrame.src = `${VIDLINK_URL}/tv/${tvId}/${season}/${episode}?nextbutton=true`;
+    elements.videoFrame.src = `${VIDLINK_URL}/embed/tv/${tvId}/${season}/${episode}?autoPlay=true`;
     elements.videoFrame.onload = () => elements.iframeLoader.classList.add('hidden');
     document.title = `${currentState.currentShowTitle} - S${season}:E${episode}`;
     saveToHistory(itemData, season, episode);
@@ -774,4 +774,5 @@ function showToast(msg) {
     elements.toastMsg.textContent = msg;
     elements.toast.classList.remove('opacity-0');
     setTimeout(() => elements.toast.classList.add('opacity-0'), 3000);
+
 }
