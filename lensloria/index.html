@@ -15,14 +15,12 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-4 z-50">
                 <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-red-500 bg-clip-text text-transparent cursor-pointer" onclick="switchType('all')">LENSLORIA</h1>
-                
-                <div class="hidden md:flex gap-4 lg:gap-6 ml-4 lg:ml-8">
+                <div class="hidden md:flex gap-6 ml-8">
                     <button onclick="switchType('all')" id="desk-btn-all" class="nav-link active">Home</button>
                     <button onclick="switchType('movie')" id="desk-btn-movie" class="nav-link">Movies</button>
                     <button onclick="switchType('tv')" id="desk-btn-tv" class="nav-link">TV Series</button>
-                    <div class="w-px h-4 bg-zinc-700 self-center mx-1"></div>
+                    <button onclick="switchType('watchlist')" id="desk-btn-list" class="nav-link">My List</button>
                     <button onclick="switchType('history')" id="desk-btn-history" class="nav-link">History</button>
-                    <button onclick="switchType('watchlist')" id="desk-btn-watchlist" class="nav-link">Watchlist</button>
                     <button onclick="switchType('settings')" id="desk-btn-settings" class="nav-link">Settings</button>
                 </div>
             </div>
@@ -49,48 +47,55 @@
         </div>
     </nav>
 
-    <div id="more-menu" class="fixed z-[140] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-48 overflow-hidden hidden">
-        <div class="p-2 flex flex-col gap-1">
-            <button onclick="switchType('history')" class="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-800 rounded-lg transition text-sm text-zinc-200">
-                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                History
-            </button>
-            <button onclick="switchType('watchlist')" class="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-800 rounded-lg transition text-sm text-zinc-200">
-                <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
-                Watchlist
-            </button>
-            <div class="h-px bg-zinc-800 my-1"></div>
-            <button onclick="switchType('settings')" class="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-800 rounded-lg transition text-sm text-zinc-200">
-                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                Settings
-            </button>
-        </div>
-    </div>
-
     <main id="main-content" class="pt-32 px-3 md:px-6 max-w-7xl mx-auto min-h-screen transition-all duration-200">
         <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-2xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
             <span id="toast-msg">Notification</span>
         </div>
-
+        
         <div id="settings-view" class="hidden max-w-lg mx-auto py-10">
             <h2 class="text-2xl font-bold mb-6 border-b border-zinc-800 pb-2">Settings</h2>
-            <div class="bg-zinc-900 rounded-xl p-6 border border-zinc-800 space-y-4">
-                <div class="flex items-center justify-between">
+            <div class="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
+                <div class="flex items-center justify-between mb-6">
                     <div>
                         <h3 class="font-medium text-white">Data Saver</h3>
-                        <p class="text-sm text-zinc-400">Lower image quality to save bandwidth.</p>
+                        <p class="text-sm text-zinc-400">Load lower quality images to save data.</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="setting-datasaver" class="sr-only peer">
                         <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                     </label>
                 </div>
-                <div class="flex items-center justify-between border-t border-zinc-800 pt-4">
-                     <div>
-                        <h3 class="font-medium text-white">Version</h3>
-                        <p class="text-sm text-zinc-400 mt-1">Lensloria v3.1</p>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="font-medium text-white">Autoplay Next Episode</h3>
+                        <p class="text-sm text-zinc-400">Automatically play next episode (if available).</p>
                     </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="setting-autoplay" class="sr-only peer">
+                        <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    </label>
                 </div>
+
+                <div class="mt-4 pt-4 border-t border-zinc-800 mb-6">
+                    <h3 class="font-medium text-white mb-2">Streaming Source</h3>
+                    <select id="setting-source" class="w-full bg-zinc-800 text-white p-2.5 rounded-lg border border-zinc-700 text-sm focus:ring-2 focus:ring-purple-600 outline-none cursor-pointer">
+                        </select>
+                    <p class="text-xs text-zinc-500 mt-2">If a video doesn't load or buffers, try switching the server.</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-zinc-800">
+                    <div>
+                        <h3 class="font-medium text-white">Clear Watch History</h3>
+                        <p class="text-sm text-zinc-400 mt-1">Remove all items from your "Continue Watching" list.</p>
+                    </div>
+                    <button id="btn-clear-history" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Clear
+                    </button>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-sm text-zinc-500">
+                <p>Lensloria v2.6</p>
             </div>
         </div>
 
@@ -113,27 +118,37 @@
                 <div id="contextual-row-list" class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px] scroll-smooth"></div>
             </div>
 
-            <div id="page-header" class="flex items-center justify-between mb-4 mt-6 border-b border-zinc-800 pb-2">
-                <h2 id="section-title" class="text-xl font-bold text-white">Trending Now</h2>
-                <button id="header-action-btn" class="hidden text-xs font-semibold text-red-400 hover:text-red-300 border border-red-500/50 hover:bg-red-500/10 px-3 py-1.5 rounded-full transition-all">
-                    Clear List
-                </button>
-            </div>
-            
+            <h2 id="section-title" class="text-xl font-bold text-white mb-4 mt-6 border-b border-zinc-800 pb-2">Trending Now</h2>
             <div id="content-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6"></div>
             
-            <div id="empty-state" class="hidden text-center py-20">
-                <svg class="w-16 h-16 text-zinc-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>
-                <p class="text-zinc-500">Nothing to see here yet.</p>
-            </div>
-
             <div id="sentinel" class="h-24 w-full flex justify-center items-center opacity-0 pointer-events-none">
                 <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce"></div>
             </div>
         </div>
     </main>
 
-    <div id="details-modal" class="modal-overlay fixed top-0 left-0 right-0 bottom-16 md:bottom-0 z-[120] bg-black" aria-hidden="true">
+    <div id="mobile-more-popup" class="hidden md:hidden fixed bottom-[4.5rem] right-4 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-[120] flex-col overflow-hidden animate-fade-in">
+        <button onclick="switchType('watchlist'); toggleMoreMenu()" class="flex items-center gap-3 p-4 hover:bg-zinc-800 transition border-b border-zinc-800/50 w-full text-left">
+            <div class="bg-purple-600/20 p-2 rounded-lg text-purple-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+            </div>
+            <span class="font-medium text-sm">My Watchlist</span>
+        </button>
+        <button onclick="switchType('history'); toggleMoreMenu()" class="flex items-center gap-3 p-4 hover:bg-zinc-800 transition border-b border-zinc-800/50 w-full text-left">
+            <div class="bg-blue-600/20 p-2 rounded-lg text-blue-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <span class="font-medium text-sm">History</span>
+        </button>
+        <button onclick="switchType('settings'); toggleMoreMenu()" class="flex items-center gap-3 p-4 hover:bg-zinc-800 transition w-full text-left">
+            <div class="bg-zinc-700/50 p-2 rounded-lg text-zinc-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </div>
+            <span class="font-medium text-sm">Settings</span>
+        </button>
+    </div>
+
+    <div id="details-modal" class="modal-overlay fixed top-0 left-0 right-0 bottom-16 md:bottom-0 z-[100] bg-black" aria-hidden="true">
         
         <div id="details-header" class="fixed top-0 left-0 w-full h-16 z-30 flex items-center justify-center transition-all duration-300 border-b border-transparent">
             <button onclick="closeDetailsModal(true)" class="absolute left-4 p-2 bg-black/60 hover:bg-black rounded-full text-white transition backdrop-blur-md z-40">
@@ -142,7 +157,7 @@
             <span id="sticky-title" class="font-bold text-white text-base md:text-lg opacity-0 transition-opacity duration-300 pointer-events-none truncate max-w-[60%]"></span>
         </div>
 
-        <div id="details-modal-content" class="modal-content-slide-up relative w-full h-full bg-black flex flex-col overflow-y-auto custom-scrollbar">
+        <div id="details-modal-content" class="relative w-full h-full bg-black flex flex-col overflow-y-auto custom-scrollbar">
             
             <div class="relative w-full aspect-video md:aspect-[2.5/1] shrink-0">
                 <img id="details-backdrop" class="w-full h-full object-cover" src="" alt="">
@@ -159,14 +174,15 @@
 
                     <p id="details-description" class="text-zinc-300 text-sm md:text-base leading-relaxed line-clamp-4 hover:line-clamp-none transition-all cursor-pointer active:line-clamp-none"></p>
 
-                    <div class="flex gap-3 items-center">
-                        <button id="details-play-btn" class="flex-1 md:flex-none md:min-w-[200px] bg-white text-black hover:bg-zinc-200 py-3.5 px-6 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-95">
+                    <div class="flex gap-3">
+                        <button id="details-play-btn" class="flex-1 md:flex-none md:w-auto md:min-w-[200px] bg-white text-black hover:bg-zinc-200 py-3.5 px-6 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 mb-2">
                             <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                             <span id="play-btn-text">Play</span>
                         </button>
                         
-                        <button id="details-watchlist-btn" class="p-3.5 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 transition flex items-center justify-center gap-2">
-                            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                        <button id="details-watchlist-btn" class="flex-none bg-transparent text-white border border-zinc-600 py-3.5 px-4 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 mb-2">
+                            <svg id="watchlist-btn-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span id="watchlist-btn-text" class="hidden md:inline">My List</span>
                         </button>
                     </div>
                 </div>
@@ -174,12 +190,12 @@
                 <div id="details-tv-section" class="hidden flex flex-col border-t border-zinc-800">
                     
                     <div id="season-sticky-bar" class="sticky top-16 z-20 bg-black/90 backdrop-blur-md border-b border-zinc-800 px-4 md:px-8 py-3 flex items-center shadow-lg">
-                        
-                        <button id="season-selector-btn" class="flex items-center gap-2 font-bold text-white text-sm uppercase tracking-wide hover:text-purple-400 transition-colors">
-                            <span id="season-selector-text">Season 1</span>
-                            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-
+                        <div class="relative group cursor-pointer">
+                            <select id="season-select" class="appearance-none bg-transparent text-white text-sm font-bold pr-6 focus:outline-none cursor-pointer uppercase tracking-wide"></select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center text-zinc-400 group-hover:text-white">
+                                <svg class="fill-current h-3 w-3" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
                     </div>
                     
                     <div id="episodes-list" class="flex flex-col gap-4 p-4 md:p-8 pb-20"></div>
@@ -188,31 +204,37 @@
         </div>
     </div>
 
-    <div id="season-modal" class="modal-overlay fixed inset-0 z-[135] bg-black hidden flex flex-col" aria-hidden="true">
-        <div class="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900">
-            <h3 class="text-lg font-bold text-white">Select Season</h3>
-            <button onclick="closeSeasonModal()" class="p-2 bg-zinc-800 rounded-full text-zinc-400 hover:text-white">
+    <div id="video-modal" class="modal-overlay fixed inset-0 bottom-0 z-[110] bg-black hidden flex flex-col transition-opacity duration-300" aria-hidden="true">
+        <div class="flex-none p-4 flex justify-between items-center bg-black/90 backdrop-blur border-b border-zinc-800 sticky top-0 z-20">
+            <div class="flex flex-col overflow-hidden max-w-[80%]">
+                <h2 id="player-title" class="text-base md:text-lg font-bold text-white truncate"></h2>
+                <span id="player-subtitle" class="text-xs text-zinc-400 truncate"></span>
+            </div>
+            <button onclick="closeVideoModal()" class="p-2 bg-zinc-800 rounded-full hover:bg-zinc-700 transition text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        <div id="season-list-container" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
-            </div>
-    </div>
-
-    <div id="video-modal" class="modal-overlay fixed inset-0 z-[150] bg-black hidden flex items-center justify-center" aria-hidden="true">
-        <button onclick="closeVideoModal()" class="absolute top-6 right-6 z-50 p-2 bg-black/50 hover:bg-black/80 rounded-full text-white transition backdrop-blur-sm border border-white/10 group">
-            <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
         
-        <div id="video-container" class="w-full h-full bg-black relative">
+        <div class="flex-grow w-full bg-black relative flex items-center justify-center">
             <div id="iframe-loader" class="absolute inset-0 flex items-center justify-center z-0">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500"></div>
             </div>
-            <iframe id="video-frame" class="w-full h-full border-0 z-10 relative" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" playsinline webkit-playsinline></iframe>
+            <iframe id="video-frame" class="w-full h-full border-0 z-10 relative" allowfullscreen allow="autoplay; fullscreen"></iframe>
+        </div>
+        
+        <div id="player-controls" class="flex-none hidden flex-row justify-between items-center gap-3 p-4 bg-black border-t border-zinc-800 pb-safe">
+            <button id="btn-prev-ep" class="flex-1 bg-zinc-900 hover:bg-zinc-800 text-white py-3 px-4 rounded-lg border border-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Previous
+            </button>
+            <button id="btn-next-ep" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg border border-purple-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:border-zinc-700 text-sm font-semibold transition flex items-center justify-center gap-2">
+                Next
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
         </div>
     </div>
 
-    <nav id="mobile-navbar" class="md:hidden fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-lg border-t border-zinc-800 flex justify-around items-center h-16 z-[130] pb-safe transition-transform duration-300">
+    <nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-black/95 backdrop-blur-lg border-t border-zinc-800 flex justify-around items-center h-16 z-[110] pb-safe">
         <button onclick="closeDetailsModal(true); switchType('all')" id="mob-btn-all" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-purple-500 hover:text-white group active:scale-95 transition">
             <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             <span class="text-[10px]">Home</span>
@@ -225,8 +247,8 @@
             <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             <span class="text-[10px]">TV Series</span>
         </button>
-        <button id="mob-btn-more" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-white group active:scale-95 transition">
-            <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+        <button onclick="toggleMoreMenu()" id="mob-btn-more" class="mobile-nav-btn flex flex-col items-center justify-center w-full h-full text-zinc-400 hover:text-white group active:scale-95 transition">
+            <svg class="w-6 h-6 mb-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             <span class="text-[10px]">More</span>
         </button>
     </nav>
