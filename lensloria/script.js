@@ -9,6 +9,18 @@ const HISTORY_KEY = "lensloria_watch_history";
 const WATCHLIST_KEY = "lensloria_watchlist";
 const SETTINGS_KEY = "lensloria_settings";
 
+// --- Player Sources Configuration ---
+const STREAM_SOURCES = [
+    { name: "Videasy (Default)", url: "https://player.videasy.net", path: "" },
+    { name: "VidSrc.me", url: "https://vidsrc.me", path: "/embed" },
+    { name: "VidLink", url: "https://vidlink.pro", path: "" },
+    { name: "VidSrc.vip", url: "https://vidsrc.vip", path: "/embed" },
+    { name: "SuperEmbed", url: "https://multiembed.mov", path: "" }, 
+    { name: "2Embed", url: "https://www.2embed.cc", path: "" },       
+    { name: "VidFast", url: "https://vidfast.pro", path: "" },
+    { name: "RiveStream", url: "https://rivestream.org", path: "" }   
+];
+
 // --- State ---
 let currentState = {
     type: 'all', 
@@ -21,10 +33,12 @@ let currentState = {
 
 let currentDetailsItem = null; 
 let currentPlayingItem = null;
-let currentSelectedSeason = 1; 
-let currentSeasonsData = []; 
-let userSettings = { dataSaver: false, autoplay: true };
-let loaderTimeout = null;
+let currentTvData = null; // Caches full TV show details for smart episode navigation
+let userSettings = { 
+    dataSaver: false, 
+    autoplay: true,
+    sourceUrl: "https://player.videasy.net" 
+};
 
 // --- DOM Elements ---
 const elements = {
@@ -35,6 +49,7 @@ const elements = {
     homeRows: document.getElementById('home-rows-container'),
     categoryView: document.getElementById('category-view'),
     settingsView: document.getElementById('settings-view'),
+    mobileMorePopup: document.getElementById('mobile-more-popup'),
     gridView: document.getElementById('grid-view'),
     contextualRowSection: document.getElementById('contextual-row-section'),
     contextualRowList: document.getElementById('contextual-row-list'),
@@ -70,13 +85,23 @@ const elements = {
     // Player Modal Elements
     videoModal: document.getElementById('video-modal'),
     videoFrame: document.getElementById('video-frame'), 
+    playerTitle: document.getElementById('player-title'),
+    playerSubtitle: document.getElementById('player-subtitle'),
+    playerControls: document.getElementById('player-controls'),
+    btnPrevEp: document.getElementById('btn-prev-ep'),
+    btnNextEp: document.getElementById('btn-next-ep'),
     iframeLoader: document.getElementById('iframe-loader'),
     
     continueSection: document.getElementById('continue-watching-section'),
     continueList: document.getElementById('continue-watching-list'),
     sectionTitle: document.getElementById('section-title'),
     toast: document.getElementById('toast'),
-    toastMsg: document.getElementById('toast-msg')
+    toastMsg: document.getElementById('toast-msg'),
+    
+    // Settings Elements
+    settingSource: document.getElementById('setting-source'),
+    btnExportData: document.getElementById('btn-export-data'),
+    importFile: document.getElementById('import-file')
 };
 
 // --- Initialization ---
@@ -88,8 +113,29 @@ document.addEventListener('DOMContentLoaded', () => {
     attachNavListeners();
     safeEventListener('mob-search-toggle', 'click', () => toggleMobileSearch());
     safeEventListener('setting-datasaver', 'change', () => toggleSetting('dataSaver'));
+    safeEventListener('setting-autoplay', 'change', () => toggleSetting('autoplay'));
+    safeEventListener('btn-clear-history', 'click', clearHistory);
+    safeEventListener('setting-source', 'change', changeSource);
+    safeEventListener('btn-export-data', 'click', exportData);
+    safeEventListener('import-file', 'change', importData);
     
-    // Sticky Header Logic
+    safeEventListener('details-watchlist-btn', 'click', () => {
+        if(currentDetailsItem) toggleWatchlist(currentDetailsItem);
+    });
+    
+    // Close More Popup Logic
+    document.addEventListener('click', (e) => {
+        const popup = elements.mobileMorePopup;
+        const btn = document.getElementById('mob-btn-more');
+        if (popup && !popup.classList.contains('hidden') && !popup.contains(e.target) && !btn.contains(e.target)) {
+            popup.classList.add('hidden');
+            if(currentState.type !== 'watchlist' && currentState.type !== 'history' && currentState.type !== 'settings') {
+               btn.classList.remove('text-purple-500', 'text-white');
+               btn.classList.add('text-zinc-400');
+            }
+        }
+    });
+
     if(elements.detailsModalContent) {
         elements.detailsModalContent.addEventListener('scroll', () => {
             const titleBottom = elements.detailsTitle.offsetTop + elements.detailsTitle.offsetHeight;
@@ -151,44 +197,81 @@ function attachNavListeners() {
     };
     for (const [id, type] of Object.entries(btns)) {
         safeEventListener(id, 'click', () => {
-            closeDetailsModal(true);
-            closeVideoModal();
-            closeMoreMenu();
             switchType(type);
         });
     }
 }
 
-function setupMoreMenu() {
-    const toggleMenu = (e) => {
-        e.stopPropagation();
-        const menu = elements.moreMenu;
-        const isOpen = menu.classList.contains('open');
-        if (isOpen) {
-            closeMoreMenu();
-        } else {
-            menu.classList.remove('hidden');
-            void menu.offsetWidth; 
-            menu.classList.add('open');
-            // Mobile positioning
-            menu.style.bottom = '70px';
-            menu.style.top = 'auto';
-            menu.style.right = '10px';
-            menu.style.transformOrigin = 'bottom right';
+function toggleMoreMenu() {
+    elements.mobileMorePopup.classList.toggle('hidden');
+    const btn = document.getElementById('mob-btn-more');
+    if (!elements.mobileMorePopup.classList.contains('hidden')) {
+        btn.classList.add('text-purple-500', 'text-white');
+        btn.classList.remove('text-zinc-400');
+    } else {
+        if(currentState.type !== 'watchlist' && currentState.type !== 'history' && currentState.type !== 'settings') {
+            btn.classList.remove('text-purple-500', 'text-white');
+            btn.classList.add('text-zinc-400');
+        }
+    }
+}
+
+// --- Import / Export Logic ---
+function exportData() {
+    const data = {
+        history: getHistory(),
+        watchlist: getWatchlist(),
+        settings: userSettings
+    };
+    
+    // Create a Blob to safely handle large data objects
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "lensloria_backup.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast("Data exported successfully!");
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (data.history) localStorage.setItem(HISTORY_KEY, JSON.stringify(data.history));
+            if (data.watchlist) localStorage.setItem(WATCHLIST_KEY, JSON.stringify(data.watchlist));
+            if (data.settings) {
+                userSettings = { ...userSettings, ...data.settings };
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+                loadSettings(); 
+            }
+            
+            showToast("Data imported successfully!");
+            
+            // Refresh views if currently active
+            if(currentState.type === 'history') loadHistoryData();
+            if(currentState.type === 'watchlist') loadWatchlistData();
+            if(currentState.type === 'all') updateContinueWatching();
+            
+        } catch (err) {
+            showToast("Invalid backup file.");
+            console.error("Import Error:", err);
         }
     };
-
-    if(elements.mobBtnMore) elements.mobBtnMore.onclick = (e) => toggleMenu(e);
-    
-    document.addEventListener('click', (e) => {
-        if (!elements.moreMenu.contains(e.target)) closeMoreMenu();
-    });
+    reader.readAsText(file);
+    event.target.value = ''; // Reset input to allow importing the same file again
 }
 
-function closeMoreMenu() {
-    elements.moreMenu.classList.remove('open');
-    setTimeout(() => elements.moreMenu.classList.add('hidden'), 200);
-}
 
 function loadSettings() {
     const saved = localStorage.getItem(SETTINGS_KEY);
@@ -298,40 +381,17 @@ function toggleWatchlist(item) {
     if(currentState.type === 'watchlist') loadWatchlistData();
 }
 
-function updateWatchlistButtonState(id) {
-    const list = getWatchlist();
-    const btn = elements.detailsWatchlistBtn;
-    if (list[id]) {
-        btn.classList.add('watchlist-btn-active', 'text-yellow-500', 'border-yellow-500');
-        btn.innerHTML = `<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+function updateWatchlistButton(isInList) {
+    elements.detailsWatchlistBtn.classList.remove('bg-white', 'text-black', 'border-white', 'bg-transparent', 'text-white', 'border-zinc-600');
+    if(isInList) {
+        elements.watchlistBtnText.textContent = "In List";
+        elements.watchlistBtnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'; 
+        elements.detailsWatchlistBtn.classList.add('bg-white', 'text-black', 'border-white');
     } else {
-        btn.classList.remove('watchlist-btn-active', 'text-yellow-500', 'border-yellow-500');
-        btn.innerHTML = `<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>`;
+        elements.watchlistBtnText.textContent = "My List";
+        elements.watchlistBtnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>'; 
+        elements.detailsWatchlistBtn.classList.add('bg-transparent', 'text-white', 'border-zinc-600');
     }
-}
-
-function clearHistoryData() {
-    if(confirm("Clear entire watch history?")) {
-        localStorage.removeItem(HISTORY_KEY);
-        if (currentState.type === 'all') updateContinueWatching();
-        if (currentState.type === 'history') loadLocalContent('history');
-        showToast("History cleared!");
-    }
-}
-
-function clearWatchlistData() {
-    if(confirm("Clear entire watchlist?")) {
-        localStorage.removeItem(WATCHLIST_KEY);
-        if (currentState.type === 'watchlist') loadLocalContent('watchlist');
-        showToast("Watchlist cleared!");
-    }
-}
-
-function getImageUrl(path, type = 'small') {
-    if(!path) return 'https://via.placeholder.com/300x450';
-    if(userSettings.dataSaver) return `https://image.tmdb.org/t/p/w300${path}`;
-    if(type === 'original') return `${IMG_URL_ORIGINAL}${path}`;
-    return type === 'large' ? `${IMG_URL_LARGE}${path}` : `${IMG_URL_SMALL}${path}`;
 }
 
 function updateContinueWatching() {
@@ -350,6 +410,90 @@ function updateContinueWatching() {
     list.innerHTML = '';
     items.forEach(item => list.appendChild(createMiniCard(item, item.type, true)));
     addScrollButtons(section, list);
+}
+
+// --- Navigation Logic ---
+function switchType(type) {
+    closeDetailsModal(true);
+    closeVideoModal();
+    if(elements.mobileMorePopup) elements.mobileMorePopup.classList.add('hidden');
+
+    if (currentState.type === type && type !== 'all' && type !== 'watchlist' && type !== 'history' && type !== 'settings') return;
+
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+        btn.classList.remove('text-purple-500', 'text-white');
+        btn.classList.add('text-zinc-400');
+    });
+
+    let deskId, mobId;
+    if(type === 'watchlist') deskId = 'desk-btn-list';
+    else if(type === 'history') deskId = 'desk-btn-history';
+    else if(type === 'settings') deskId = 'desk-btn-settings';
+    else if(type === 'all') { deskId = 'desk-btn-all'; mobId = 'mob-btn-all'; }
+    else if(type === 'movie') { deskId = 'desk-btn-movie'; mobId = 'mob-btn-movie'; }
+    else if(type === 'tv') { deskId = 'desk-btn-tv'; mobId = 'mob-btn-tv'; }
+    
+    if (type === 'watchlist' || type === 'history' || type === 'settings') {
+        mobId = 'mob-btn-more';
+    }
+
+    const deskEl = document.getElementById(deskId);
+    if(deskEl) deskEl.classList.add('active');
+    
+    const mobEl = document.getElementById(mobId);
+    if(mobEl) {
+        mobEl.classList.add('text-purple-500', 'text-white');
+        mobEl.classList.remove('text-zinc-400');
+    }
+
+    currentState.type = type;
+    currentState.page = 1;
+    currentState.hasMore = true;
+    currentState.genreId = null;
+    currentState.genreName = '';
+
+    [elements.homeView, elements.categoryView, elements.gridView, elements.settingsView, elements.genreContainer].forEach(el => el && el.classList.add('hidden'));
+    
+    if (type === 'settings') {
+        elements.settingsView.classList.remove('hidden');
+    } else if (type === 'watchlist') {
+        elements.gridView.classList.remove('hidden');
+        elements.contextualRowSection.classList.add('hidden');
+        elements.sectionTitle.textContent = "My Watchlist";
+        elements.grid.innerHTML = '';
+        loadWatchlistData();
+        currentState.hasMore = false; 
+    } else if (type === 'history') {
+        elements.gridView.classList.remove('hidden');
+        elements.contextualRowSection.classList.add('hidden');
+        elements.sectionTitle.textContent = "Watch History";
+        elements.grid.innerHTML = '';
+        loadHistoryData();
+        currentState.hasMore = false;
+    } else if (type === 'all') {
+        elements.homeView.classList.remove('hidden');
+        elements.gridView.classList.remove('hidden'); 
+        elements.contextualRowSection.classList.add('hidden');
+        elements.sectionTitle.textContent = "Overall Trending";
+        updateContinueWatching();
+        loadHomeData();
+        elements.grid.innerHTML = '';
+        loadContent();
+    } else {
+        elements.genreContainer.classList.remove('hidden');
+        elements.homeView.classList.add('hidden');
+        elements.categoryView.classList.remove('hidden'); 
+        elements.gridView.classList.remove('hidden'); 
+        elements.contextualRowSection.classList.remove('hidden');
+        elements.sectionTitle.textContent = type === 'movie' ? "Trending Movies" : "Trending Series";
+        fetchGenres();
+        updateContextualRow(type, null); 
+        elements.grid.innerHTML = '';
+        loadContent();
+    }
+    adjustPadding();
+    window.scrollTo(0,0);
 }
 
 // --- Home/Grid Logic ---
@@ -446,167 +590,6 @@ function getRowSkeletons(count) {
     return html;
 }
 
-// --- Navigation Logic ---
-function switchType(type) {
-    closeDetailsModal(true);
-    closeMoreMenu();
-    
-    if (currentState.type === type && type !== 'all') return;
-    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-        btn.classList.remove('text-purple-500', 'text-white');
-        btn.classList.add('text-zinc-400');
-    });
-
-    // Handle Active States for Nav
-    if(['all', 'movie', 'tv', 'history', 'watchlist', 'settings'].includes(type)) {
-        const deskId = `desk-btn-${type}`;
-        const deskEl = document.getElementById(deskId);
-        if(deskEl) deskEl.classList.add('active');
-
-        // Mobile Nav Highlights
-        if (['all', 'movie', 'tv'].includes(type)) {
-             const mobId = `mob-btn-${type}`;
-             const mobEl = document.getElementById(mobId);
-             if(mobEl) {
-                 mobEl.classList.add('text-purple-500', 'text-white');
-                 mobEl.classList.remove('text-zinc-400');
-             }
-        } else if (['watchlist', 'history', 'settings'].includes(type)) {
-             if(elements.mobBtnMore) {
-                 elements.mobBtnMore.classList.add('text-purple-500', 'text-white');
-                 elements.mobBtnMore.classList.remove('text-zinc-400');
-             }
-        }
-    }
-
-    currentState.type = type;
-    currentState.page = 1;
-    currentState.hasMore = true;
-    currentState.genreId = null;
-    currentState.genreName = '';
-
-    [elements.homeView, elements.categoryView, elements.gridView, elements.settingsView, elements.genreContainer].forEach(el => el.classList.add('hidden'));
-    elements.headerActionBtn.classList.add('hidden');
-    // Clear listeners
-    const newBtn = elements.headerActionBtn.cloneNode(true);
-    elements.headerActionBtn.parentNode.replaceChild(newBtn, elements.headerActionBtn);
-    elements.headerActionBtn = newBtn;
-
-    if (type === 'settings') {
-        elements.settingsView.classList.remove('hidden');
-    } else if (type === 'watchlist') {
-        elements.gridView.classList.remove('hidden');
-        elements.contextualRowSection.classList.add('hidden');
-        elements.sectionTitle.textContent = "My Watchlist";
-        elements.grid.innerHTML = '';
-        loadWatchlistData();
-        currentState.hasMore = false; 
-    } else if (type === 'history') {
-        elements.gridView.classList.remove('hidden');
-        elements.contextualRowSection.classList.add('hidden');
-        elements.sectionTitle.textContent = "Watch History";
-        elements.grid.innerHTML = '';
-        loadHistoryData();
-        currentState.hasMore = false;
-    } else if (type === 'all') {
-        elements.homeView.classList.remove('hidden');
-        elements.gridView.classList.remove('hidden'); 
-        elements.contextualRowSection.classList.add('hidden');
-        elements.sectionTitle.textContent = "Overall Trending";
-        updateContinueWatching();
-        loadHomeData();
-        elements.grid.innerHTML = '';
-        loadContent();
-    } else {
-        // Movies or TV
-        elements.genreContainer.classList.remove('hidden');
-        elements.homeView.classList.add('hidden');
-        elements.categoryView.classList.remove('hidden'); 
-        elements.gridView.classList.remove('hidden'); 
-        elements.contextualRowSection.classList.remove('hidden');
-        elements.sectionTitle.textContent = type === 'movie' ? "Trending Movies" : "Trending Series";
-        fetchGenres();
-        updateContextualRow(type, null); 
-        elements.grid.innerHTML = '';
-        loadContent();
-    }
-    adjustPadding();
-    window.scrollTo(0,0);
-}
-
-// --- Data Loading ---
-function loadHomeData() {
-    const container = document.getElementById('home-rows-container');
-    container.innerHTML = ''; 
-    const rows = [
-        { title: "Trending Movies Today", url: `${BASE_URL}/trending/movie/day?api_key=${API_KEY}`, type: 'movie' },
-        { title: "Trending Series Today", url: `${BASE_URL}/trending/tv/day?api_key=${API_KEY}`, type: 'tv' },
-        { title: "Popular Movies", url: `${BASE_URL}/movie/popular?api_key=${API_KEY}`, type: 'movie' },
-        { title: "Popular Series", url: `${BASE_URL}/tv/popular?api_key=${API_KEY}`, type: 'tv' },
-    ];
-
-    rows.forEach(row => {
-        const wrapper = document.createElement('div');
-        wrapper.className = "animate-fade-in group/row relative";
-        const listDiv = document.createElement('div');
-        listDiv.className = "flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x min-h-[160px] scroll-smooth";
-        wrapper.innerHTML = `<h2 class="text-lg font-bold text-white mb-3 pl-3 border-l-4 border-purple-600">${row.title}</h2>`;
-        wrapper.appendChild(listDiv);
-        container.appendChild(wrapper);
-        fetchRow(row.url, null, row.type, listDiv);
-        addScrollButtons(wrapper, listDiv);
-    });
-}
-
-async function loadContent() {
-    if (['watchlist', 'history', 'settings'].includes(currentState.type)) return;
-    if (currentState.isLoading || !currentState.hasMore) return;
-    
-    currentState.isLoading = true;
-    const temp = document.createElement('div');
-    temp.id = 'temp-skeletons';
-    temp.className = "contents"; 
-    temp.innerHTML = getGridSkeletons(12);
-    elements.grid.appendChild(temp);
-    
-    try {
-        let url = currentState.type === 'all' ? `${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${currentState.page}&language=en-US` : (currentState.genreId ? `${BASE_URL}/discover/${currentState.type === 'movie'?'movie':'tv'}?api_key=${API_KEY}&with_genres=${currentState.genreId}&page=${currentState.page}&language=en-US&sort_by=popularity.desc` : `${BASE_URL}/trending/${currentState.type === 'movie'?'movie':'tv'}/week?api_key=${API_KEY}&page=${currentState.page}`);
-        const response = await fetch(url);
-        const data = await response.json();
-        if(document.getElementById('temp-skeletons')) document.getElementById('temp-skeletons').remove();
-        
-        if (data.results) {
-            data.results.forEach(item => container.appendChild(createMiniCard(item, type)));
-        } else {
-             currentState.hasMore = false;
-        }
-    } catch (error) { 
-        if(document.getElementById('temp-skeletons')) document.getElementById('temp-skeletons').remove(); 
-    } finally { currentState.isLoading = false; }
-}
-
-function loadLocalContent(type) {
-    elements.grid.innerHTML = '';
-    elements.emptyState.classList.add('hidden');
-    let items = [];
-    
-    if (type === 'watchlist') {
-        items = Object.values(getWatchlist()).sort((a, b) => b.timestamp - a.timestamp);
-    } else if (type === 'history') {
-        items = Object.values(getHistory()).sort((a, b) => b.timestamp - a.timestamp);
-    }
-    
-    if (items.length === 0) {
-        elements.emptyState.classList.remove('hidden');
-        return;
-    }
-    
-    renderCards(items);
-    currentState.hasMore = false; 
-}
-
-// --- Rendering ---
 function renderCards(items) {
     items.forEach(item => {
         const card = document.createElement('div');
@@ -637,30 +620,109 @@ function renderCards(items) {
     });
 }
 
-function createMiniCard(item, type, isHistory = false) {
-    const div = document.createElement('div');
-    div.className = "flex-none w-28 md:w-36 relative group/card cursor-pointer snap-start";
-    const progressLabel = isHistory && item.season ? `S${item.season}:E${item.episode}` : (item.release_date || item.first_air_date || '').split('-')[0];
-
-    div.innerHTML = `
-        <div class="aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 relative shadow-lg">
-            <img src="${getImageUrl(item.poster_path, 'small')}" class="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-110" loading="lazy">
-            <div class="absolute top-1 right-1 bg-black/60 backdrop-blur rounded px-1.5 py-0.5 text-[10px] text-yellow-400 font-bold">★ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</div>
-            ${isHistory ? `<div class="absolute bottom-0 left-0 w-full h-1 bg-zinc-700"><div class="h-full bg-purple-500 w-full"></div></div>` : ''}
-        </div>
-        <div class="mt-2">
-            <h4 class="text-xs font-medium truncate text-zinc-200 group-hover/card:text-purple-400 transition-colors">${item.title || item.name}</h4>
-            <p class="text-[10px] text-zinc-500">${progressLabel}</p>
-        </div>
-    `;
-    div.onclick = () => {
-        const fullItem = { ...item, media_type: type };
-        openDetailsModal(fullItem);
-    };
-    return div;
+function loadWatchlistData() {
+    const data = getWatchlist();
+    const items = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+    if(items.length === 0) {
+        elements.grid.innerHTML = '<div class="col-span-full text-center text-zinc-500 py-10">Your watchlist is empty.</div>';
+    } else {
+        renderCards(items);
+    }
 }
 
-// --- Details Modal ---
+function loadHistoryData() {
+    const data = getHistory();
+    const items = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+    if(items.length === 0) {
+        elements.grid.innerHTML = '<div class="col-span-full text-center text-zinc-500 py-10">No watch history found.</div>';
+    } else {
+        renderCards(items);
+    }
+}
+
+function toggleMobileSearch(forceOpen = false) {
+    if (forceOpen) {
+        elements.mobSearchBar.classList.remove('hidden');
+        elements.mobSearchInput.focus();
+    } else {
+        elements.mobSearchBar.classList.toggle('hidden');
+        if (!elements.mobSearchBar.classList.contains('hidden')) elements.mobSearchInput.focus();
+    }
+    adjustPadding();
+}
+
+async function fetchGenres() {
+    try {
+        const response = await fetch(`${BASE_URL}/genre/${currentState.type}/list?api_key=${API_KEY}&language=en-US`);
+        const data = await response.json();
+        elements.genreList.innerHTML = '';
+        if (data.genres) {
+            data.genres.forEach(genre => {
+                const btn = document.createElement('button');
+                btn.className = `whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all border bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white`;
+                btn.textContent = genre.name;
+                btn.onclick = () => {
+                    currentState.genreId = genre.id;
+                    currentState.genreName = genre.name;
+                    currentState.page = 1;
+                    currentState.hasMore = true;
+                    elements.grid.innerHTML = '';
+                    updateContextualRow(currentState.type, genre.id, genre.name);
+                    elements.sectionTitle.textContent = `${genre.name} ${currentState.type === 'movie' ? 'Movies' : 'Series'}`;
+                    Array.from(elements.genreList.children).forEach(c => c.className = c.className.replace('bg-purple-600', 'bg-zinc-800/50').replace('border-purple-600', 'border-zinc-700'));
+                    btn.className = btn.className.replace('bg-zinc-800/50', 'bg-purple-600').replace('border-zinc-700', 'border-purple-600');
+                    loadContent();
+                };
+                elements.genreList.appendChild(btn);
+            });
+        }
+        setTimeout(adjustPadding, 100);
+    } catch (e) { showToast("Failed to load genres"); }
+}
+
+async function loadContent() {
+    if (currentState.isLoading || !currentState.hasMore) return;
+    currentState.isLoading = true;
+    const temp = document.createElement('div');
+    temp.id = 'temp-skeletons';
+    temp.className = "contents"; 
+    temp.innerHTML = getGridSkeletons(12);
+    elements.grid.appendChild(temp);
+    try {
+        let url = currentState.type === 'all' ? `${BASE_URL}/trending/all/week?api_key=${API_KEY}&page=${currentState.page}&language=en-US` : (currentState.genreId ? `${BASE_URL}/discover/${currentState.type === 'movie'?'movie':'tv'}?api_key=${API_KEY}&with_genres=${currentState.genreId}&page=${currentState.page}&language=en-US&sort_by=popularity.desc` : `${BASE_URL}/trending/${currentState.type === 'movie'?'movie':'tv'}/week?api_key=${API_KEY}&page=${currentState.page}`);
+        const response = await fetch(url);
+        const data = await response.json();
+        if(document.getElementById('temp-skeletons')) document.getElementById('temp-skeletons').remove();
+        
+        if (data.results) {
+            const validResults = data.results.filter(item => item.poster_path);
+            if (validResults.length === 0) currentState.hasMore = false;
+            else { renderCards(validResults); currentState.page++; }
+        } else {
+             console.error("API Error: No results", data);
+             currentState.hasMore = false;
+        }
+    } catch (error) { 
+        console.error("Load Content Error:", error);
+        if(document.getElementById('temp-skeletons')) document.getElementById('temp-skeletons').remove(); 
+    } finally { currentState.isLoading = false; }
+}
+
+function getGridSkeletons(count) {
+    let html = '';
+    for(let i=0; i<count; i++) html += `<div class="rounded-xl overflow-hidden shadow-lg bg-zinc-900 aspect-[2/3] relative skeleton"></div>`;
+    return html;
+}
+
+// --- Details Modal Logic ---
+function createBadge(text, colorClasses, id = null) {
+    const span = document.createElement('span');
+    span.className = `px-2 py-1 rounded text-xs border ${colorClasses}`;
+    span.textContent = text;
+    if(id) span.id = id;
+    return span;
+}
+
 async function openDetailsModal(item) {
     currentDetailsItem = item;
     const title = item.title || item.name;
@@ -862,116 +924,160 @@ async function updateEpisodeListInDetails(tvId, seasonNum) {
     } catch(e) { console.error(e); }
 }
 
-// --- Helpers & Shared ---
-function getGridSkeletons(count) {
-    let html = '';
-    for(let i=0; i<count; i++) html += `<div class="rounded-xl overflow-hidden shadow-lg bg-zinc-900 aspect-[2/3] relative skeleton"></div>`;
-    return html;
-}
+// --- Video Player Logic ---
+function playContent(item, season = null, episode = null) {
+    currentPlayingItem = item;
+    elements.detailsModal.classList.add('hidden');
+    elements.videoModal.classList.remove('hidden');
+    
+    if(elements.navbar) elements.navbar.classList.add('hidden');
+    if(elements.mobileNav) elements.mobileNav.classList.add('hidden');
 
-function getRowSkeletons(count) {
-    let html = '';
-    for(let i=0; i<count; i++) html += `<div class="flex-none w-28 md:w-36 aspect-[2/3] rounded-lg bg-zinc-900 skeleton"></div>`;
-    return html;
-}
+    setTimeout(() => { elements.videoModal.setAttribute('aria-hidden', 'false'); }, 10);
+    elements.iframeLoader.classList.remove('hidden');
+    
+    const isTv = item.media_type === 'tv';
+    
+    const displayTitle = item.title || item.name || "Unknown Title";
+    elements.playerTitle.textContent = displayTitle;
+    elements.playerSubtitle.textContent = isTv ? `S${season}:E${episode}` : ((item.release_date||'').split('-')[0] || 'Movie');
+    document.title = isTv ? `${displayTitle} S${season}:E${episode}` : displayTitle;
 
-function createBadge(text, colorClasses, id = null) {
-    const span = document.createElement('span');
-    span.className = `px-2 py-1 rounded text-xs border ${colorClasses}`;
-    span.textContent = text;
-    if(id) span.id = id;
-    return span;
-}
-
-function addScrollButtons(wrapper, listElement) {
-    wrapper.querySelectorAll('.scroll-btn').forEach(b => b.remove());
-    const btnClass = "scroll-btn hidden md:flex absolute top-[55%] -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-sm transition-opacity opacity-0 group-hover/row:opacity-100 cursor-pointer border border-zinc-600";
-    const leftBtn = document.createElement('button');
-    leftBtn.className = `${btnClass} left-2`;
-    leftBtn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>`;
-    leftBtn.onclick = () => listElement.scrollBy({ left: -400, behavior: 'smooth' });
-    const rightBtn = document.createElement('button');
-    rightBtn.className = `${btnClass} right-2`;
-    rightBtn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
-    rightBtn.onclick = () => listElement.scrollBy({ left: 400, behavior: 'smooth' });
-    wrapper.appendChild(leftBtn);
-    wrapper.appendChild(rightBtn);
-}
-
-async function updateContextualRow(type, genreId, genreName) {
-    const titleEl = document.getElementById('contextual-row-title');
-    titleEl.textContent = genreId ? `Top Rated ${genreName}` : `Top Rated ${type === 'movie' ? 'Movies' : 'TV Shows'}`;
-    addScrollButtons(elements.contextualRowSection, elements.contextualRowList);
-    let url = genreId ? `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_genres=${genreId}&sort_by=vote_average.desc&vote_count.gte=300&page=1` : `${BASE_URL}/${type}/top_rated?api_key=${API_KEY}&page=1`;
-    fetchRow(url, 'contextual-row-list', type);
-}
-
-async function fetchRow(url, containerId, type, element = null) {
-    const container = element || document.getElementById(containerId);
-    if(!container) return;
-    container.innerHTML = getRowSkeletons(6);
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
-        container.innerHTML = '';
-        if (data.results) {
-            data.results.forEach(item => container.appendChild(createMiniCard(item, type)));
+    const source = STREAM_SOURCES.find(s => s.url === userSettings.sourceUrl) || STREAM_SOURCES[0];
+    let playUrl = "";
+    
+    if (source.name === "SuperEmbed") {
+        playUrl = `${source.url}/?video_id=${item.id}&tmdb=1`;
+        if(isTv) {
+            playUrl += `&s=${season}&e=${episode}`;
         }
-    } catch(e) { console.error("Network Error in fetchRow:", e); }
-}
-
-async function fetchGenres() {
-    try {
-        const response = await fetch(`${BASE_URL}/genre/${currentState.type}/list?api_key=${API_KEY}&language=en-US`);
-        const data = await response.json();
-        elements.genreList.innerHTML = '';
-        if (data.genres) {
-            data.genres.forEach(genre => {
-                const btn = document.createElement('button');
-                btn.className = `whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all border bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white`;
-                btn.textContent = genre.name;
-                btn.onclick = () => {
-                    currentState.genreId = genre.id;
-                    currentState.genreName = genre.name;
-                    currentState.page = 1;
-                    currentState.hasMore = true;
-                    elements.grid.innerHTML = '';
-                    updateContextualRow(currentState.type, genre.id, genre.name);
-                    elements.sectionTitle.textContent = `${genre.name} ${currentState.type === 'movie' ? 'Movies' : 'Series'}`;
-                    Array.from(elements.genreList.children).forEach(c => c.className = c.className.replace('bg-purple-600', 'bg-zinc-800/50').replace('border-purple-600', 'border-zinc-700'));
-                    btn.className = btn.className.replace('bg-zinc-800/50', 'bg-purple-600').replace('border-zinc-700', 'border-purple-600');
-                    loadContent();
-                };
-                elements.genreList.appendChild(btn);
-            });
+    } 
+    else if (source.name === "2Embed") {
+        if(isTv) {
+            playUrl = `${source.url}/embedtv/${item.id}&s=${season}&e=${episode}`;
+        } else {
+            playUrl = `${source.url}/embed/${item.id}`;
         }
-        setTimeout(adjustPadding, 100);
-    } catch (e) { showToast("Failed to load genres"); }
-}
-
-async function fetchExtendedDetails(type, id) {
-    try {
-        const res = await fetch(`${BASE_URL}/${type}/${id}?api_key=${API_KEY}&language=en-US&append_to_response=release_dates,content_ratings`);
-        const data = await res.json();
-        
-        if (data.overview && elements.detailsDesc.textContent === "Loading details...") {
-            elements.detailsDesc.textContent = data.overview;
+    }
+    else if (source.name === "RiveStream") {
+        const type = isTv ? 'series' : 'movie';
+        playUrl = `${source.url}/embed?type=${type}&id=${item.id}`;
+        if(isTv) {
+            playUrl += `&season=${season}&episode=${episode}`;
         }
-        if (data.backdrop_path) {
-            elements.detailsBackdrop.src = getImageUrl(data.backdrop_path, 'original');
+    } 
+    else {
+        const pathPrefix = source.path || "";
+        if (isTv) {
+            playUrl = `${source.url}${pathPrefix}/tv/${item.id}/${season}/${episode}`;
+        } else {
+            playUrl = `${source.url}${pathPrefix}/movie/${item.id}`;
         }
         
-        // Genre Tags
-        if(data.genres) {
-             data.genres.slice(0, 2).forEach(g => {
-                elements.detailsBadges.appendChild(createBadge(g.name, 'text-zinc-400 border-zinc-700 bg-transparent'));
-            });
-        }
-    } catch(e) { console.error(e); }
+        const separator = playUrl.includes('?') ? '&' : '?';
+        playUrl += `${separator}autoplay=1&muted=0`;
+
+        if(source.url.includes("videasy.net")) playUrl += "&nextbutton=true";
+    }
+
+    if (isTv) {
+        elements.playerControls.classList.remove('hidden');
+        elements.playerControls.classList.add('flex');
+        saveToHistory(item, season, episode);
+    } else {
+        elements.playerControls.classList.add('hidden');
+        elements.playerControls.classList.remove('flex');
+        saveToHistory(item);
+    }
+
+    elements.videoFrame.src = playUrl;
+    elements.videoFrame.onload = () => {
+        elements.iframeLoader.classList.add('hidden');
+    };
 }
 
+async function navigateEpisode(direction) {
+    if (!currentPlayingItem || currentPlayingItem.media_type !== 'tv') return;
+    
+    // Ensure we have current TV data (fallback if player opened weirdly)
+    let tvData = currentTvData;
+    if (!tvData || tvData.id !== currentPlayingItem.id) {
+        try {
+            const res = await fetch(`${BASE_URL}/tv/${currentPlayingItem.id}?api_key=${API_KEY}`);
+            tvData = await res.json();
+            currentTvData = tvData;
+        } catch (e) {
+            showToast("Network error. Can't load next episode.");
+            return;
+        }
+    }
+
+    const history = getHistory()[currentPlayingItem.id];
+    let currentS = parseInt(history?.season || 1);
+    let currentE = parseInt(history?.episode || 1);
+
+    const seasons = tvData.seasons.filter(s => s.season_number > 0); // Ignore specials (s0)
+
+    if (direction === 1) { // Next Episode
+        const currentSeasonObj = seasons.find(s => s.season_number === currentS);
+        const maxEpisodes = currentSeasonObj ? currentSeasonObj.episode_count : 999;
+        
+        if (currentE >= maxEpisodes) {
+            // Reached end of season, try jumping to next season
+            const nextSeasonObj = seasons.find(s => s.season_number === currentS + 1);
+            if (nextSeasonObj && nextSeasonObj.episode_count > 0) {
+                currentS++;
+                currentE = 1;
+            } else {
+                showToast("No more episodes!");
+                return;
+            }
+        } else {
+            currentE++;
+        }
+    } else { // Previous Episode
+        if (currentE <= 1) {
+            // Try jumping to previous season
+            const prevSeasonObj = seasons.find(s => s.season_number === currentS - 1);
+            if (prevSeasonObj && prevSeasonObj.episode_count > 0) {
+                currentS--;
+                currentE = prevSeasonObj.episode_count;
+            } else {
+                showToast("Start of series!");
+                return;
+            }
+        } else {
+            currentE--;
+        }
+    }
+    
+    playContent(currentPlayingItem, currentS, currentE);
+}
+
+function closeVideoModal() {
+    elements.videoModal.setAttribute('aria-hidden', 'true');
+    document.title = APP_TITLE;
+
+    setTimeout(() => {
+        elements.videoModal.classList.add('hidden');
+        elements.videoFrame.src = '';
+        currentPlayingItem = null;
+        
+        if(elements.navbar) elements.navbar.classList.remove('hidden');
+        if(elements.mobileNav) elements.mobileNav.classList.remove('hidden');
+
+        if (currentDetailsItem) {
+            elements.detailsModal.classList.remove('hidden');
+            if (currentDetailsItem.media_type === 'tv') setupTvDetails(currentDetailsItem.id, currentDetailsItem);
+        } else {
+             document.body.classList.remove('no-scroll');
+        }
+    }, 300);
+}
+
+// --- Utils: Search ---
+let debounceTimer;
 function setupSearch(inputId, resultsId) {
-    let debounceTimer;
     const inputEl = document.getElementById(inputId);
     const resultsEl = document.getElementById(resultsId);
     if(!inputEl || !resultsEl) return;
