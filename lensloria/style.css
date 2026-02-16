@@ -12,8 +12,8 @@ body.no-scroll {
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #09090b; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #52525b; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #09090b; } /* darkened track */
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #52525b; border-radius: 10px; } /* zinc-600 */
 
 /* Skeleton Loading Animation */
 @keyframes shimmer {
@@ -22,20 +22,15 @@ body.no-scroll {
 }
 .skeleton {
     animation: shimmer 2s infinite linear;
-    background: linear-gradient(to right, #18181b 4%, #27272a 25%, #18181b 36%);
+    background: linear-gradient(to right, #18181b 4%, #27272a 25%, #18181b 36%); /* zinc-900 to zinc-800 */
     background-size: 1000px 100%;
 }
 
 .nav-link {
-    color: #a1a1aa;
+    color: #a1a1aa; /* zinc-400 */
     font-weight: 500;
     transition: color 0.2s;
-    font-size: 0.85rem;
-    cursor: pointer;
-    white-space: nowrap;
-}
-@media (min-width: 1024px) {
-    .nav-link { font-size: 0.95rem; }
+    font-size: 0.95rem;
 }
 .nav-link:hover { color: #fff; }
 .nav-link.active { color: #fff; position: relative; }
@@ -63,12 +58,12 @@ body.no-scroll {
     pointer-events: auto; 
 }
 
-/* Modal Content Animations */
-.modal-content-slide-up {
+/* Details Modal Content Animation */
+#details-modal-content {
     transform: translateY(100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.modal-overlay[aria-hidden="false"] .modal-content-slide-up {
+.modal-overlay[aria-hidden="false"] #details-modal-content {
     transform: translateY(0);
 }
 
@@ -81,7 +76,7 @@ body.no-scroll {
 }
 .episode-card.active {
     background-color: rgba(255, 255, 255, 0.08);
-    border-left-color: #9333ea;
+    border-left-color: #9333ea; /* Purple active border */
 }
 .episode-card:hover .play-overlay {
     background-color: rgba(0,0,0,0.4);
@@ -96,17 +91,3 @@ body.no-scroll {
     to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-
-/* More Menu Transition */
-#more-menu {
-    transform: scale(0.95);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: bottom right;
-}
-#more-menu.open {
-    transform: scale(1);
-    opacity: 1;
-    pointer-events: auto;
-}
