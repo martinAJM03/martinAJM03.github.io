@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Whatabarcode">
     <title>Whatabarcode</title>
+    
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+    <link rel="manifest" href="manifest.json">
     
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -30,17 +34,15 @@
         <div id="errorMsg" class="error">Enter exactly 10 digits</div>
 
         <div class="action-buttons">
-            <button class="btn-primary" onclick="checkAndGenerate()">Scan Now</button>
-            <button class="btn-success" onclick="saveCurrentBarcode()">Save</button>
+            <button class="btn-success" onclick="saveCurrentBarcode()">Save Barcode</button>
+        </div>
+
+        <div class="barcode-container" id="barcodeContainer" onclick="openFullscreen()">
+            <img id="barcodeCanvas" alt="Barcode Preview" />
         </div>
     </div>
 
     <div class="scrollable-content">
-        <div class="barcode-container" id="barcodeContainer" onclick="openFullscreen()">
-            <img id="barcodeCanvas" alt="Barcode Preview" />
-            <div class="tap-hint">Tap to expand</div>
-        </div>
-
         <div class="list-section">
             <div class="section-title">GitHub Coupons</div>
             <div id="githubList" class="item-list">
@@ -58,7 +60,9 @@
 
     <div id="fullscreenContainer" class="fullscreen-overlay">
         <div class="fullscreen-wrapper" id="fullscreenWrapper">
-            <img id="fullscreenCanvas" alt="Fullscreen Barcode" />
+            <div class="fullscreen-content-group">
+                <img id="fullscreenCanvas" alt="Fullscreen Barcode" />
+            </div>
         </div>
     </div>
 
