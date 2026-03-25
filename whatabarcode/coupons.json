@@ -1,6 +1,14 @@
 {
   "coupons": [
     {
+      "name": "Patty Melt",
+      "barcode": "1000132699"
+    },
+    {
+      "name": "Fry w/ Whatafresher",
+      "barcode": "1000132700"
+    },
+    {
       "name": "Monterey Melt",
       "barcode": "1000132815"
     },
