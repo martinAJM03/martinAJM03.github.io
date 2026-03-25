@@ -1,7 +1,31 @@
-// Global variable to keep track of the current barcode name
+// Global variables
 let currentBarcodeName = "";
+let fetchedGitHubCoupons = []; // Store fetched coupons for quick lookup
 
 // --- Core Logic ---
+
+// Helper function to check if the new code exists in our lists
+function checkAndSetName(code) {
+    // 1. Check Local Saved Coupons
+    const saved = JSON.parse(localStorage.getItem('savedBarcodes') || '[]');
+    let found = saved.find(item => item.barcode === code);
+    
+    if (found) {
+        currentBarcodeName = found.name;
+        return;
+    }
+    
+    // 2. Check GitHub Fetched Coupons
+    found = fetchedGitHubCoupons.find(item => item.barcode === code);
+    if (found) {
+        currentBarcodeName = found.name;
+        return;
+    }
+    
+    // 3. Not found, clear the name
+    currentBarcodeName = "";
+}
+
 function adjustValue(delta) {
     const input = document.getElementById('barcodeInput');
     let val = parseInt(input.value, 10);
@@ -11,10 +35,11 @@ function adjustValue(delta) {
     if (val < 0) val = 0;
     if (val > 9999999999) val = 9999999999;
     
-    input.value = val.toString().padStart(10, '0');
+    const newCode = val.toString().padStart(10, '0');
+    input.value = newCode;
     
-    // Clear the name when manually adjusting values
-    currentBarcodeName = ""; 
+    // Check if we have a name for this new value
+    checkAndSetName(newCode); 
     checkAndGenerate();
 }
 
@@ -38,14 +63,14 @@ function checkAndGenerate() {
     // Generate Standard Inline Preview via JsBarcode
     JsBarcode("#barcodeCanvas", `>${input}<`, {
         format: "CODE128",
-        width: 3,      // Slightly thinner bars to fit nicely without gaps
-        height: 80,     // Reduced height
+        width: 3,      
+        height: 80,     
         displayValue: true, 
         text: displayText,
         fontSize: 16,
         font: "monospace",
         textMargin: 8,
-        margin: 5,       // Reduced margin to pull it tight to the edges
+        margin: 5,       
         background: "#ffffff",
         lineColor: "#000000"
     });
@@ -60,11 +85,13 @@ async function fetchCouponsAndInit() {
         let res = await fetch('coupons.json');
         if (!res.ok) throw new Error('Local not found');
         loadedData = await res.json();
+        fetchedGitHubCoupons = loadedData.coupons; // Save globally
         renderList(loadedData.coupons, listEl, false);
     } catch (e) {
         try {
             let res2 = await fetch('https://raw.githubusercontent.com/martinAJM03/martinAJM03.github.io/refs/heads/main/whatabarcode/coupons.json');
             loadedData = await res2.json();
+            fetchedGitHubCoupons = loadedData.coupons; // Save globally
             renderList(loadedData.coupons, listEl, false);
         } catch (err) {
             listEl.innerHTML = '<div class="empty-state">Failed to load coupons.</div>';
@@ -123,6 +150,12 @@ function deleteBarcode(index, event) {
     const saved = JSON.parse(localStorage.getItem('savedBarcodes') || '[]');
     saved.splice(index, 1);
     localStorage.setItem('savedBarcodes', JSON.stringify(saved));
+    
+    // Update display in case we deleted the currently viewed code
+    const input = document.getElementById('barcodeInput').value;
+    checkAndSetName(input);
+    checkAndGenerate();
+    
     renderLocalList();
 }
 
@@ -130,7 +163,9 @@ function loadBarcode(code, name) {
     document.getElementById('barcodeInput').value = code;
     currentBarcodeName = name; // Update the global name
     checkAndGenerate();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Reset scroll of the list area to top
+    document.querySelector('.scrollable-content').scrollTo({ top: 0, behavior: 'smooth' });
     
     // Wait briefly for UI to update, then trigger fullscreen automatically
     setTimeout(() => {
@@ -255,9 +290,14 @@ fsOverlay.addEventListener('touchend', (e) => {
 // --- Init ---
 const inputEl = document.getElementById('barcodeInput');
 
-// Clear the name if user manually types a new code
+// Automatically check and show name if user manually types a code
 inputEl.addEventListener('input', () => {
-    currentBarcodeName = "";
+    const newCode = inputEl.value;
+    if (/^\d{10}$/.test(newCode)) {
+        checkAndSetName(newCode);
+    } else {
+        currentBarcodeName = "";
+    }
     checkAndGenerate();
 });
 
