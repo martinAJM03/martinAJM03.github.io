@@ -1,6 +1,6 @@
 :root {
-    --primary: #007aff;
-    --success: #34c759;
+    --primary: #FF7100; /* Updated to requested orange */
+    --success: #FF7100; /* Updated to requested orange */
     --bg: #ffffff;
     --surface: #ffffff;
     --text: #000000;
@@ -9,24 +9,31 @@
     --danger: #ff3b30;
 }
 
+/* Lock the html and body from scrolling entirely to prevent rubber-banding on the header */
+html, body {
+    height: 100%;
+    overflow: hidden; 
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg);
     color: var(--text);
-    margin: 0;
-    padding: 0;
     overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Sticky Top Section */
+/* Fixed Top Section */
 .sticky-header {
-    position: sticky;
-    top: 0;
+    flex-shrink: 0; /* Prevents this section from collapsing */
     background-color: var(--bg);
     padding: calc(env(safe-area-inset-top) + 10px) 16px 12px;
     z-index: 50;
-    border-bottom: 1px solid var(--border); /* Added to separate sticky header from scrolling list */
+    border-bottom: 1px solid var(--border);
 }
 
 .header {
@@ -126,7 +133,7 @@ input {
 .action-buttons button:active { opacity: 0.8; }
 
 .barcode-container {
-    margin-top: 1rem; /* Added spacing above the barcode since it's now under the save button */
+    margin-top: 1rem; 
     padding: 0;
     background: var(--surface);
     display: flex;
@@ -142,16 +149,21 @@ input {
     object-fit: contain;
 }
 
-/* Scrollable Bottom Section */
+/* Scrollable Bottom Section - This is the ONLY part of the app that scrolls */
 .scrollable-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain; /* Traps the bounce effect inside this div */
     padding: 16px;
     padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 .list-section {
     margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .section-title {
@@ -216,7 +228,7 @@ input {
     font-size: 0.85rem;
 }
 
-/* Fullscreen Overlay Styling (Draggable) */
+/* Fullscreen Overlay Styling */
 .fullscreen-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
