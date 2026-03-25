@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Whatabarcode">
+    <title>Whatabarcode</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+
+    <div class="sticky-header">
+        <div class="header">
+            <h1>Whatabarcode</h1>
+        </div>
+        
+        <div class="input-row">
+            <button class="icon-btn" onclick="adjustValue(-1)" aria-label="Decrease">-</button>
+            <div class="input-wrapper">
+                <input type="text" id="barcodeInput" inputmode="numeric" pattern="[0-9]*" placeholder="10 Digits" maxlength="10">
+            </div>
+            <button class="icon-btn" onclick="adjustValue(1)" aria-label="Increase">+</button>
+        </div>
+
+        <div id="errorMsg" class="error">Enter exactly 10 digits</div>
+
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="checkAndGenerate()">Scan Now</button>
+            <button class="btn-success" onclick="saveCurrentBarcode()">Save</button>
+        </div>
+    </div>
+
+    <div class="scrollable-content">
+        <div class="barcode-container" id="barcodeContainer" onclick="openFullscreen()">
+            <img id="barcodeCanvas" alt="Barcode Preview" />
+            <div class="tap-hint">Tap to expand</div>
+        </div>
+
+        <div class="list-section">
+            <div class="section-title">GitHub Coupons</div>
+            <div id="githubList" class="item-list">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+        <div class="list-section">
+            <div class="section-title">Local Coupons</div>
+            <div id="savedList" class="item-list">
+                <div class="empty-state">No saved barcodes yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fullscreenContainer" class="fullscreen-overlay">
+        <div class="fullscreen-wrapper" id="fullscreenWrapper">
+            <img id="fullscreenCanvas" alt="Fullscreen Barcode" />
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
