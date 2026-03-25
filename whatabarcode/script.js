@@ -1,3 +1,6 @@
+// Global variable to keep track of the current barcode name
+let currentBarcodeName = "";
+
 // --- Core Logic ---
 function adjustValue(delta) {
     const input = document.getElementById('barcodeInput');
@@ -9,6 +12,9 @@ function adjustValue(delta) {
     if (val > 9999999999) val = 9999999999;
     
     input.value = val.toString().padStart(10, '0');
+    
+    // Clear the name when manually adjusting values
+    currentBarcodeName = ""; 
     checkAndGenerate();
 }
 
@@ -26,36 +32,56 @@ function checkAndGenerate() {
     errorMsg.classList.remove('visible');
     barcodeContainer.style.display = 'flex';
     
+    // Format text to display name alongside the barcode value natively
+    const displayText = currentBarcodeName ? `${currentBarcodeName} >${input}<` : `>${input}<`;
+
     // Generate Standard Inline Preview via JsBarcode
     JsBarcode("#barcodeCanvas", `>${input}<`, {
         format: "CODE128",
-        width: 3,        
-        height: 120,     
+        width: 3,      // Slightly thinner bars to fit nicely without gaps
+        height: 80,     // Reduced height
         displayValue: true, 
-        fontSize: 22,
+        text: displayText,
+        fontSize: 16,
+        font: "monospace",
         textMargin: 8,
-        margin: 10,
+        margin: 5,       // Reduced margin to pull it tight to the edges
         background: "#ffffff",
         lineColor: "#000000"
     });
 }
 
-// --- Data Fetching (GitHub/Local) ---
-async function fetchCoupons() {
+// --- Data Fetching & Init Logic ---
+async function fetchCouponsAndInit() {
     const listEl = document.getElementById('githubList');
+    let loadedData = null;
+    
     try {
         let res = await fetch('coupons.json');
         if (!res.ok) throw new Error('Local not found');
-        let data = await res.json();
-        renderList(data.coupons, listEl, false);
+        loadedData = await res.json();
+        renderList(loadedData.coupons, listEl, false);
     } catch (e) {
         try {
             let res2 = await fetch('https://raw.githubusercontent.com/martinAJM03/martinAJM03.github.io/refs/heads/main/whatabarcode/coupons.json');
-            let data2 = await res2.json();
-            renderList(data2.coupons, listEl, false);
+            loadedData = await res2.json();
+            renderList(loadedData.coupons, listEl, false);
         } catch (err) {
             listEl.innerHTML = '<div class="empty-state">Failed to load coupons.</div>';
         }
+    }
+
+    // Initialize Default Barcode
+    const inputEl = document.getElementById('barcodeInput');
+    if (!inputEl.value) {
+        if (loadedData && loadedData.coupons && loadedData.coupons.length > 0) {
+            inputEl.value = loadedData.coupons[0].barcode;
+            currentBarcodeName = loadedData.coupons[0].name;
+        } else {
+            inputEl.value = "1000132815";
+            currentBarcodeName = "Monterey Melt";
+        }
+        checkAndGenerate();
     }
 }
 
@@ -85,6 +111,10 @@ function saveCurrentBarcode() {
     saved.push({ name: name.trim(), barcode: input });
     localStorage.setItem('savedBarcodes', JSON.stringify(saved));
     
+    // Set the current name to what they just saved
+    currentBarcodeName = name.trim();
+    checkAndGenerate(); 
+    
     renderLocalList();
 }
 
@@ -96,10 +126,16 @@ function deleteBarcode(index, event) {
     renderLocalList();
 }
 
-function loadBarcode(code) {
+function loadBarcode(code, name) {
     document.getElementById('barcodeInput').value = code;
+    currentBarcodeName = name; // Update the global name
     checkAndGenerate();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Wait briefly for UI to update, then trigger fullscreen automatically
+    setTimeout(() => {
+        openFullscreen();
+    }, 50);
 }
 
 function renderLocalList() {
@@ -117,7 +153,9 @@ function renderList(items, container, isDeletable) {
     items.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.onclick = () => loadBarcode(item.barcode);
+        
+        // Pass both barcode and name to the load function
+        div.onclick = () => loadBarcode(item.barcode, item.name);
         
         let innerHTML = `
             <div class="item-info">
@@ -146,17 +184,20 @@ let currentTranslateX = 0, currentTranslateY = 0;
 function openFullscreen() {
     const input = document.getElementById('barcodeInput').value;
     if (!/^\d{10}$/.test(input)) return;
-    
-    const isPortrait = window.innerHeight > window.innerWidth;
 
-    // Generate maximum clarity and larger size barcode, encoding the symbols
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const displayText = currentBarcodeName ? `${currentBarcodeName} >${input}<` : `>${input}<`;
+
+    // Generate maximum clarity and larger size barcode, encoding the symbols and baked-in text
     JsBarcode("#fullscreenCanvas", `>${input}<`, {
         format: "CODE128",
-        width: isPortrait ? 6 : 5, 
-        height: isPortrait ? window.innerWidth * 0.6 : window.innerHeight * 0.6, 
+        width: isPortrait ? 5 : 4, 
+        height: isPortrait ? window.innerWidth * 0.5 : window.innerHeight * 0.5, 
         displayValue: true,
-        fontSize: 32,
-        margin: 20,
+        text: displayText,
+        fontSize: 22,
+        font: "monospace",
+        margin: 15,
         background: "#ffffff",
         lineColor: "#000000"
     });
@@ -213,11 +254,14 @@ fsOverlay.addEventListener('touchend', (e) => {
 
 // --- Init ---
 const inputEl = document.getElementById('barcodeInput');
-inputEl.addEventListener('input', checkAndGenerate);
+
+// Clear the name if user manually types a new code
+inputEl.addEventListener('input', () => {
+    currentBarcodeName = "";
+    checkAndGenerate();
+});
 
 window.onload = () => {
-    if(!inputEl.value) inputEl.value = "1000132815";
-    checkAndGenerate();
-    fetchCoupons();
+    fetchCouponsAndInit();
     renderLocalList();
 };
