@@ -1,6 +1,10 @@
 {
   "coupons": [
     {
+      "name": "BOGO Shake",
+      "barcode": "1000132369"
+    },
+    {
       "name": "Patty Melt",
       "barcode": "1000132699"
     },
