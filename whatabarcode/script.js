@@ -86,13 +86,13 @@ async function fetchCouponsAndInit() {
         if (!res.ok) throw new Error('Local not found');
         loadedData = await res.json();
         fetchedGitHubCoupons = loadedData.working; // Save globally
-        renderList(loadedData.coupons, listEl, false);
+        renderList(loadedData.working, listEl, false);
     } catch (e) {
         try {
             let res2 = await fetch('https://raw.githubusercontent.com/martinAJM03/martinAJM03.github.io/refs/heads/main/whatabarcode/coupons.json');
             loadedData = await res2.json();
-            fetchedGitHubCoupons = loadedData.coupons; // Save globally
-            renderList(loadedData.coupons, listEl, false);
+            fetchedGitHubCoupons = loadedData.working; // Save globally
+            renderList(loadedData.working, listEl, false);
         } catch (err) {
             listEl.innerHTML = '<div class="empty-state">Failed to load coupons.</div>';
         }
@@ -101,9 +101,9 @@ async function fetchCouponsAndInit() {
     // Initialize Default Barcode
     const inputEl = document.getElementById('barcodeInput');
     if (!inputEl.value) {
-        if (loadedData && loadedData.coupons && loadedData.coupons.length > 0) {
-            inputEl.value = loadedData.coupons[0].barcode;
-            currentBarcodeName = loadedData.coupons[0].name;
+        if (loadedData && loadedData.working && loadedData.working.length > 0) {
+            inputEl.value = loadedData.working[0].barcode;
+            currentBarcodeName = loadedData.working[0].name;
         } else {
             inputEl.value = "1000132815";
             currentBarcodeName = "Monterey Melt";
