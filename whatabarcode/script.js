@@ -85,7 +85,7 @@ async function fetchCouponsAndInit() {
         let res = await fetch('coupons.json');
         if (!res.ok) throw new Error('Local not found');
         loadedData = await res.json();
-        fetchedGitHubCoupons = loadedData.coupons; // Save globally
+        fetchedGitHubCoupons = loadedData.working; // Save globally
         renderList(loadedData.coupons, listEl, false);
     } catch (e) {
         try {
