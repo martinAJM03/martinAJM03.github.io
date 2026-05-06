@@ -1,6 +1,10 @@
 {
   "working": [
     {
+      "name": "Justaburger Meal w/ Meal",
+      "barcode": "1000132517"
+    },
+    {
       "name": "BOGO Shake",
       "barcode": "1000132369"
     },
@@ -13,14 +17,6 @@
       "barcode": "1000132700"
     },
     {
-      "name": "Whatacatch",
-      "barcode": "1000132822"
-    },
-    {
-      "name": "Whatacatch",
-      "barcode": "1000132823"
-    },
-    {
       "name": "Bacon Steakhouse Double",
       "barcode": "1000132833"
     },
@@ -29,12 +25,24 @@
       "barcode": "1000132834"
     },
     {
+      "name": "Justaburger Meal w/ Meal",
+      "barcode": "1000132837"
+    },
+    {
+      "name": "Whatachick'n Strips",
+      "barcode": "1000132839"
+    },
+    {
       "name": "Charred Jalapeño Patty Melt",
       "barcode": "1000132844"
     },
     {
       "name": "Charred Jalapeño Patty Melt",
       "barcode": "1000132845"
+    },
+    {
+      "name": "Patty Melt",
+      "barcode": "1000132848"
     }
   ],
   "expired": [
@@ -265,6 +273,14 @@
     },
     {
       "barcode": "1000132817"
+    },
+    {
+      "name": "Whatacatch",
+      "barcode": "1000132822"
+    },
+    {
+      "name": "Whatacatch",
+      "barcode": "1000132823"
     },
     {
       "barcode": "1000132824"
