@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Pushups</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+</head>
+<body>
+    <div id="app-container">
+        <div id="start-screen">
+            <h1>Pushups</h1>
+            <p>Track your form using AI.</p>
+            <button id="start-btn">Start Camera</button>
+        </div>
+
+        <video id="video" playsinline autoplay></video>
+        <canvas id="canvas"></canvas>
+        
+        <div id="top-bar" class="hidden">
+            <span class="label">Target:</span>
+            <input type="number" id="target-input" value="10" inputmode="numeric">
+        </div>
+        
+        <div id="center-display">
+            <h1 id="action-text" class="hidden">UP</h1>
+            <div id="feedback-toast" class="hidden">Loading AI Model...</div>
+        </div>
+        
+        <div id="bottom-bar" class="hidden">
+            <div class="count-label">Count</div>
+            <div id="count-text">0</div>
+            <div id="goal-toast" class="hidden">Goal Reached! 🎉</div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
