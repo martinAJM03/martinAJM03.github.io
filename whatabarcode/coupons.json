@@ -1,9 +1,26 @@
 {
   "working": [
     {
+      "name": "Free Small Shake",
+      "barcode": "1000131520"
+    },
+    {
+      "name": "Whataburger",
+      "barcode": "1000131580"
+    },
+    {
+      "name": "Whatachick'n Strips",
+      "barcode": "1000132035"
+    },
+    {
+      "name": "BOGO Whatawings",
+      "barcode": "1000132475"
+    },
+    {
       "name": "Justaburger Meal w/ Meal",
       "barcode": "1000132517"
     },
+    
     {
       "name": "BOGO Shake",
       "barcode": "1000132369"
@@ -17,32 +34,20 @@
       "barcode": "1000132700"
     },
     {
-      "name": "Bacon Steakhouse Double",
-      "barcode": "1000132833"
-    },
-    {
-      "name": "Bacon Steakhouse Double",
-      "barcode": "1000132834"
-    },
-    {
       "name": "Justaburger Meal w/ Meal",
       "barcode": "1000132837"
+    },
+    {
+      "name": "Hot Honey Crisp",
+      "barcode": "1000132838"
     },
     {
       "name": "Whatachick'n Strips",
       "barcode": "1000132839"
     },
     {
-      "name": "Charred Jalapeño Patty Melt",
-      "barcode": "1000132844"
-    },
-    {
-      "name": "Charred Jalapeño Patty Melt",
-      "barcode": "1000132845"
-    },
-    {
-      "name": "Patty Melt",
-      "barcode": "1000132848"
+      "name": "Hot Honey Crisp",
+      "barcode": "1000132840"
     }
   ],
   "expired": [
@@ -287,6 +292,26 @@
     },
     {
       "barcode": "1000132825"
+    },
+    {
+      "name": "Bacon Steakhouse Double",
+      "barcode": "1000132833"
+    },
+    {
+      "name": "Bacon Steakhouse Double",
+      "barcode": "1000132834"
+    },
+    {
+      "name": "Charred Jalapeño Patty Melt",
+      "barcode": "1000132844"
+    },
+    {
+      "name": "Charred Jalapeño Patty Melt",
+      "barcode": "1000132845"
+    },
+    {
+      "name": "Patty Melt",
+      "barcode": "1000132848"
     }
   ]
 }
