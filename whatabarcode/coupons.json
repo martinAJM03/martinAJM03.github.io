@@ -21,28 +21,12 @@
       "barcode": "1000132475"
     },
     {
-      "name": "Justaburger Meal w/ Meal",
-      "barcode": "1000132517"
-    },
-    {
-      "name": "Patty Melt",
-      "barcode": "1000132699"
-    },
-    {
       "name": "Fry w/ Whatafresher",
       "barcode": "1000132700"
     },
     {
-      "name": "Justaburger Meal w/ Meal",
-      "barcode": "1000132837"
-    },
-    {
       "name": "Hot Honey Crisp",
       "barcode": "1000132838"
-    },
-    {
-      "name": "Whatachick'n Strips",
-      "barcode": "1000132839"
     },
     {
       "name": "Hot Honey Crisp",
@@ -196,6 +180,10 @@
     },
     {
       "barcode": "1000132502"
+    },
+    {
+      "name": "Patty Melt",
+      "barcode": "1000132699"
     },
     {
       "barcode": "1000132534"
