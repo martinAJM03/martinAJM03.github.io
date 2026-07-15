@@ -51,6 +51,14 @@
     {
       "name": "Whataburger",
       "barcode": "1000132854"
+    },
+    {
+      "name": "Whataburger",
+      "barcode": "1000132855"
+    },
+    {
+      "name": "BOGO Taquito",
+      "barcode": "1000132858"
     }
   ],
   "expired": [
