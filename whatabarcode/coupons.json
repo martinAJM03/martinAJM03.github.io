@@ -59,6 +59,22 @@
     {
       "name": "BOGO Taquito",
       "barcode": "1000132858"
+    },
+    {
+      "name": "Premium Whatachick'n",
+      "barcode": "1000132859"
+    },
+    {
+      "name": "Premium Whatachick'n",
+      "barcode": "1000132860"
+    },
+    {
+      "name": "BOGO Taquito",
+      "barcode": "1000132861"
+    },
+    {
+      "name": "Literally nothing",
+      "barcode": "1000132862"
     }
   ],
   "expired": [
