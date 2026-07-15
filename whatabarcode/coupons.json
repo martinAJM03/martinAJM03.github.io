@@ -30,6 +30,10 @@
     },
     {
       "name": "Fry w/ Whatafresher",
+      "barcode": "1000131692"
+    },
+    {
+      "name": "Fry w/ Whatafresher",
       "barcode": "1000132700"
     },
     {
@@ -39,6 +43,14 @@
     {
       "name": "Hot Honey Crisp",
       "barcode": "1000132840"
+    },
+    {
+      "name": "BOGO Taquito",
+      "barcode": "1000132853"
+    },
+    {
+      "name": "Whataburger",
+      "barcode": "1000132854"
     }
   ],
   "expired": [
