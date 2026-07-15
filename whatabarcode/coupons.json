@@ -1,6 +1,10 @@
 {
   "working": [
     {
+      "name": "Free Whataburger",
+      "barcode": "1000131052"
+    },
+    {
       "name": "Free Small Shake",
       "barcode": "1000131520"
     },
