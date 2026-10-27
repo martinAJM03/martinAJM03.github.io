@@ -5,6 +5,10 @@
       "barcode": "1000131052"
     },
     {
+      "name": "Whataburger",
+      "barcode": "1000131278"
+    },
+    {
       "name": "Free Small Shake",
       "barcode": "1000131520"
     },
@@ -17,6 +21,14 @@
       "barcode": "1000131580"
     },
     {
+      "name": "BOGO Taquito",
+      "barcode": "1000131708"
+    },
+    {
+      "name": "Free Whataburger Jr.",
+      "barcode": "1000132024"
+    },
+    {
       "name": "Free Honey Butter Chicken Biscuit",
       "barcode": "1000132034"
     },
@@ -25,12 +37,48 @@
       "barcode": "1000132035"
     },
     {
+      "name": "Spicy Whatachick'n",
+      "barcode": "1000132134"
+    },
+    {
+      "name": "Free Whataburger",
+      "barcode": "1000132154"
+    },
+    {
+      "name": "Free BOB",
+      "barcode": "1000132169"
+    },
+    {
+      "name": "BOGO Shake",
+      "barcode": "1000132382"
+    },
+    {
+      "name": "Free Honey Butter Chicken Biscuit",
+      "barcode": "1000132384"
+    },
+    {
+      "name": "Free Iced Coffee",
+      "barcode": "1000132422"
+    },
+    {
+      "name": "Free Hot or Iced Coffee",
+      "barcode": "1000132423"
+    },
+    {
       "name": "Nothing",
       "barcode": "1000132475"
     },
     {
       "name": "Fry w/ Whatafresher",
       "barcode": "1000132692"
+    },
+    {
+      "name": "BOGO PricklyPeach Whatafresher",
+      "barcode": "1000132697"
+    },
+    {
+      "name": "Free Whatafresher",
+      "barcode": "1000132698"
     },
     {
       "name": "Fry w/ Whatafresher",
